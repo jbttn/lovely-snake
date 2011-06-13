@@ -24,10 +24,7 @@ function love.load()
   
   max_width = 800
   max_height = 600
-  game_state = "main_menu" -- main_menu, running, paused, game_over
-  
-  block_size = 10
-  speed = 50 -- In milliseconds
+  game_state = "main_menu" -- main_menu, options_menu, running, paused, game_over
   
   x_start = max_width / 2
   y_start = max_height / 2
@@ -39,6 +36,37 @@ function love.load()
   
   -- Disable key repeating
   love.keyboard.setKeyRepeat(0, 100)
+  
+  resolutions = {
+    {x=800, y=600},
+    {x=1024, y=768},
+    {x=1280, y=1024}
+  }
+  
+  colors = {
+    red = {200, 0, 70, 255},
+    white = {255, 255, 255, 255}
+  }
+  
+  difficulty = {
+    very_easy = 400,
+    easy = 200,
+    normal = 100,
+    hard = 50,
+    very_hard = 20,
+    menu = 0
+  }
+  
+  main_menu_items = {
+    "New game",
+    "Options",
+    "Quit"
+  }
+  
+  block_size = 20 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
+  speed = difficulty.menu -- In milliseconds
+  menu_item_loc = 0.30
+  menu_item_space = 0.05
 end
 
 function love.update(dt)
@@ -46,6 +74,8 @@ function love.update(dt)
   
   if game_state == "main_menu" then
     main_menu()
+    return
+  elseif game_state == "options_menu" then
     return
   elseif game_state == "paused" then
     return
@@ -56,46 +86,63 @@ function love.update(dt)
 end
 
 function love.draw()
-  love.graphics.setColor(255, 255, 255, 255)
+  love.graphics.setColor(colors.white)
+  -- Get the current y location of the mouse cursor
+  local mouse_y = love.mouse.getY()
+  
   if game_state == "main_menu" then
-    -- Get the current y location of the mouse cursor
-    local mouse_y = love.mouse.getY()
     -- Set the font size
     love.graphics.setFont(32)
     -- For completly centered text
     love.graphics.printf("LOVEly Snake", 0, max_height * 0.05, max_width, 'center')
+    
     love.graphics.setFont(20)
-
-    if mouse_y >= max_height * 0.30 and mouse_y <= max_height * 0.34 then
-      love.graphics.setColor(200, 0, 70, 255)
-    else
-      love.graphics.setColor(255, 255, 255, 255)
+    for i = 1, #main_menu_items do
+      --print(max_height * (menu_item_loc + (menu_item_space * (i - 1))) .. " " .. max_height * (menu_item_loc + (menu_item_space * i)) .. " " .. mouse_y)
+      if mouse_y >= max_height * (menu_item_loc + (menu_item_space * (i - 1))) and mouse_y < max_height * (menu_item_loc + (menu_item_space * i)) then
+        love.graphics.setColor(colors.red)
+      else
+        love.graphics.setColor(colors.white)
+      end
+      love.graphics.printf(main_menu_items[i], 0, max_height * (menu_item_loc + (menu_item_space * (i - 1))), max_width, 'center')
     end
-    love.graphics.printf("New Game", 0, max_height * 0.30, max_width, 'center')
+    --[[
+    if mouse_y >= max_height * menu_item_loc and mouse_y < max_height * (menu_item_loc + menu_item_space) then
+      love.graphics.setColor(colors.red)
+    else
+      love.graphics.setColor(colors.white)
+    end
+    love.graphics.printf("New Game", 0, max_height * menu_item_loc, max_width, 'center')
     
     if mouse_y >= max_height * 0.35 and mouse_y <= max_height * 0.39 then
-      love.graphics.setColor(200, 0, 70, 255)
+      love.graphics.setColor(colors.red)
     else
-      love.graphics.setColor(255, 255, 255, 255)
+      love.graphics.setColor(colors.white)
     end
     love.graphics.printf("Options", 0, max_height * 0.35, max_width, 'center')
     
     if mouse_y >= max_height * 0.40 and mouse_y <= max_height * 0.44 then
-      love.graphics.setColor(200, 0, 70, 255)
+      love.graphics.setColor(colors.red)
     else
-      love.graphics.setColor(255, 255, 255, 255)
+      love.graphics.setColor(colors.white)
     end
-    love.graphics.printf("Quit", 0, max_height * 0.40, max_width, 'center')
+    love.graphics.printf("Quit", 0, max_height * 0.40, max_width, 'center')]]
     
     --love.graphics.print("Press enter to play...", max_width / 2, max_height / 2)
+  elseif game_state == "options_menu" then
+    love.graphics.setFont(32)
+    love.graphics.printf("Options", 0, max_height * 0.05, max_width, 'center')
+    love.graphics.setFont(20)
+    love.graphics.printf("Difficulty", 0, max_height * 0.30, max_width, 'center')
+    -- draw image buttons here
   elseif game_state == "paused" then
-    love.graphics.setColor(255, 255, 255, 255)
+    love.graphics.setColor(colors.white)
     love.graphics.print("PAUSED", max_width / 2, max_height / 2)
   elseif game_state == "game_over" then
     --game over
   elseif game_state == "running" then
     if next(snake_food) ~= nil then
-      love.graphics.setColor(200, 0, 70, 255)
+      love.graphics.setColor(colors.red)
       love.graphics.rectangle("fill", snake_food[1]["x"], snake_food[1]["y"], block_size, block_size)
       love.graphics.setColor(0, 0, 255, 255)
     end
@@ -117,17 +164,21 @@ end
 
 function love.mousereleased(x, y, button)
   if button == 'l' then
-    --print(max_height * 0.30)
-    --print("button 1 released at position " ..  x .. ", " .. y)
-    if y >= max_height * 0.30 and y <= max_height * 0.34 then
-      print("clicked new game")
-      game_state = "running"
-    end
-    if y >= max_height * 0.35 and y <= max_height * 0.39 then
-      print("clicked options")
-    end
-    if y >= max_height * 0.40 and y <= max_height * 0.44 then
-      print("clicked quit")
+    if game_state == "main_menu" then
+      --print(max_height * 0.30)
+      --print("button 1 released at position " ..  x .. ", " .. y)
+      if y >= max_height * 0.30 and y <= max_height * 0.34 then
+        print("clicked new game")
+        game_state = "running"
+        speed = difficulty.normal -- temporary
+      end
+      if y >= max_height * 0.35 and y <= max_height * 0.39 then
+        print("clicked options")
+        game_state = "options_menu"
+      end
+      if y >= max_height * 0.40 and y <= max_height * 0.44 then
+        print("clicked quit")
+      end
     end
   end
 end
@@ -155,6 +206,12 @@ function love.keypressed(key, unicode)
     table.insert(snake_loc, {x=50, y=1}) --push?
   elseif key == 'r' then
     table.remove(snake_loc) --pop?
+  elseif key == 'g' then
+    -- testing window resizing
+    love.graphics.setMode( 1024, 768, false, true, 0 )
+    max_width = 1024
+    max_height = 768
+    --love.graphics.translate( 200, 200 )
   end
 end
 
