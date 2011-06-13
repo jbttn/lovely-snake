@@ -10,6 +10,7 @@
         * Mouse controls
         * Multiple food items? Powerups?
         * Score board with high scores
+        * Sound effects?
         * Clean up code
                                                                               ]]
 
@@ -23,8 +24,7 @@ function love.load()
   
   max_width = 800
   max_height = 600
-  paused = false
-  game_state = "start" -- start, paused, gameover
+  game_state = "main_menu" -- main_menu, running, paused, game_over
   
   block_size = 10
   speed = 50 -- In milliseconds
@@ -37,49 +37,46 @@ function love.load()
   snake_direction = "up"
   snake_food = {}
   
-  --key_is_pressed = false
   -- Disable key repeating
   love.keyboard.setKeyRepeat(0, 100)
 end
 
 function love.update(dt)
-  love.timer.sleep( speed )
+  love.timer.sleep(speed)
   
-  if paused == true then
+  if game_state == "main_menu" then
+    main_menu()
+    return
+  elseif game_state == "paused" then
     return
   end
   
   generate_food()
-  
-  --if love.keyboard.isDown("up") then
-    --if key_is_pressed == false then
-      --key_is_pressed = true
-      --snake_loc["head"]["y"] = (snake_loc["head"]["y"] - ((100 * speed) * dt))
-      --print(snake_loc["head"]["y"])
-    --end
-  --end
-  
   move_snake(dt)
 end
 
 function love.draw()
-
-  if paused == true then
+  love.graphics.setColor(255, 255, 255, 255)
+  if game_state == "main_menu" then
+    love.graphics.print("Press enter to play...", max_width / 2, max_height / 2)
+  elseif game_state == "paused" then
     love.graphics.setColor(255, 255, 255, 255)
     love.graphics.print("PAUSED", max_width / 2, max_height / 2)
-  end
-  
-  if next(snake_food) ~= nil then
-    love.graphics.setColor(200, 0, 70, 255)
-    love.graphics.rectangle("fill", snake_food[1]["x"], snake_food[1]["y"], block_size, block_size)
-    love.graphics.setColor(0, 0, 255, 255)
-  end
-  
-  for key, value in pairs(snake_loc) do
-    --love.graphics.rectangle("fill", value[1], value[2], block_size, block_size)
-    love.graphics.rectangle("fill", value.x, value.y, block_size, block_size)
-    --print("x = " .. value.x)
-    --print("y = " .. value.y)
+  elseif game_state == "game_over" then
+    --game over
+  elseif game_state == "running" then
+    if next(snake_food) ~= nil then
+      love.graphics.setColor(200, 0, 70, 255)
+      love.graphics.rectangle("fill", snake_food[1]["x"], snake_food[1]["y"], block_size, block_size)
+      love.graphics.setColor(0, 0, 255, 255)
+    end
+    
+    for key, value in pairs(snake_loc) do
+      --love.graphics.rectangle("fill", value[1], value[2], block_size, block_size)
+      love.graphics.rectangle("fill", value.x, value.y, block_size, block_size)
+      --print("x = " .. value.x)
+      --print("y = " .. value.y)
+    end
   end
 end
 
@@ -98,10 +95,10 @@ end
 function love.keypressed(key, unicode)
   if key == 'return' then
     print("The return key was pressed.")
-    if paused == false then
-      paused = true
+    if game_state ~= "paused" then
+      game_state = "paused"
     else
-      paused = false
+      game_state = "running"
     end
   elseif key == 'up' then
     snake_direction = "up"
@@ -132,7 +129,9 @@ end
 function love.focus(f)
   if not f then
     print("LOST FOCUS")
-    paused = true;
+    if game_state == "running" then
+      game_state = "paused"
+    end
   else
     print("GAINED FOCUS")
   end
@@ -140,6 +139,13 @@ end
 
 function love.quit()
   print("quit()")
+end
+
+--
+----- MENU FUNCTIONS -----
+--
+
+function main_menu()
 end
 
 --
@@ -152,19 +158,15 @@ function move_snake(dt)
   local temp
   
   if snake_direction == "up" then
-    --snake_loc["head"]["y"] = (snake_loc["head"]["y"] - ((100 * speed) * dt))
     snake_loc["head"]["y"] = snake_loc["head"]["y"] - block_size
   end
   if snake_direction == "down" then
-    --snake_loc["head"]["y"] = (snake_loc["head"]["y"] + ((100 * speed) * dt))
     snake_loc["head"]["y"] = snake_loc["head"]["y"] + block_size
   end
   if snake_direction == "left" then
-    --snake_loc["head"]["x"] = (snake_loc["head"]["x"] - ((100 * speed) * dt))
     snake_loc["head"]["x"] = snake_loc["head"]["x"] - block_size
   end
   if snake_direction == "right" then
-    --snake_loc["head"]["x"] = (snake_loc["head"]["x"] + ((100 * speed) * dt))
     snake_loc["head"]["x"] = snake_loc["head"]["x"] + block_size
   end
   
