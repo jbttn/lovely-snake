@@ -58,7 +58,36 @@ end
 function love.draw()
   love.graphics.setColor(255, 255, 255, 255)
   if game_state == "main_menu" then
-    love.graphics.print("Press enter to play...", max_width / 2, max_height / 2)
+    -- Get the current y location of the mouse cursor
+    local mouse_y = love.mouse.getY()
+    -- Set the font size
+    love.graphics.setFont(32)
+    -- For completly centered text
+    love.graphics.printf("LOVEly Snake", 0, max_height * 0.05, max_width, 'center')
+    love.graphics.setFont(20)
+
+    if mouse_y >= max_height * 0.30 and mouse_y <= max_height * 0.34 then
+      love.graphics.setColor(200, 0, 70, 255)
+    else
+      love.graphics.setColor(255, 255, 255, 255)
+    end
+    love.graphics.printf("New Game", 0, max_height * 0.30, max_width, 'center')
+    
+    if mouse_y >= max_height * 0.35 and mouse_y <= max_height * 0.39 then
+      love.graphics.setColor(200, 0, 70, 255)
+    else
+      love.graphics.setColor(255, 255, 255, 255)
+    end
+    love.graphics.printf("Options", 0, max_height * 0.35, max_width, 'center')
+    
+    if mouse_y >= max_height * 0.40 and mouse_y <= max_height * 0.44 then
+      love.graphics.setColor(200, 0, 70, 255)
+    else
+      love.graphics.setColor(255, 255, 255, 255)
+    end
+    love.graphics.printf("Quit", 0, max_height * 0.40, max_width, 'center')
+    
+    --love.graphics.print("Press enter to play...", max_width / 2, max_height / 2)
   elseif game_state == "paused" then
     love.graphics.setColor(255, 255, 255, 255)
     love.graphics.print("PAUSED", max_width / 2, max_height / 2)
@@ -88,7 +117,18 @@ end
 
 function love.mousereleased(x, y, button)
   if button == 'l' then
-    -- button 1 released at position x, y
+    --print(max_height * 0.30)
+    --print("button 1 released at position " ..  x .. ", " .. y)
+    if y >= max_height * 0.30 and y <= max_height * 0.34 then
+      print("clicked new game")
+      game_state = "running"
+    end
+    if y >= max_height * 0.35 and y <= max_height * 0.39 then
+      print("clicked options")
+    end
+    if y >= max_height * 0.40 and y <= max_height * 0.44 then
+      print("clicked quit")
+    end
   end
 end
 
