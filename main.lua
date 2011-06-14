@@ -14,6 +14,9 @@
         * Clean up code
                                                                               ]]
 
+love.filesystem.load("menus.lua")()
+love.filesystem.load("snake.lua")()
+
 --
 ----- LOVE FUNCTIONS -----
 --
@@ -63,8 +66,27 @@ function love.load()
     "Quit"
   }
   
+  ui_items = {
+    difficulty_str = {
+      "V.Easy",
+      "Easy",
+      "Normal",
+      "Hard",
+      "V.Hard"
+    },
+    difficulty_buttons = {
+      width = max_width * 0.09,
+      height = max_height * 0.05,
+      very_easy = {str="V.Easy", x_pos=max_width * 0.25, y_pos=max_height * 0.35},
+      easy = {str="Easy", x_pos=max_width * 0.35, y_pos=max_height * 0.35},
+      normal = {str="Normal", x_pos=max_width * 0.45, y_pos=max_height * 0.35},
+      hard = {str="Hard", x_pos=max_width * 0.55, y_pos=max_height * 0.35},
+      very_hard = {str="V.Hard", x_pos=max_width * 0.65, y_pos=max_height * 0.35}
+    }
+  }
+  
   block_size = 20 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
-  speed = difficulty.menu -- In milliseconds
+  speed = difficulty.hard -- In milliseconds
   menu_item_loc = 0.30
   menu_item_space = 0.05
 end
@@ -73,7 +95,6 @@ function love.update(dt)
   love.timer.sleep(speed)
   
   if game_state == "main_menu" then
-    main_menu()
     return
   elseif game_state == "options_menu" then
     return
@@ -87,54 +108,14 @@ end
 
 function love.draw()
   love.graphics.setColor(colors.white)
-  -- Get the current y location of the mouse cursor
+  -- Get the current x,y locations of the mouse cursor
+  local mouse_x = love.mouse.getX()
   local mouse_y = love.mouse.getY()
   
   if game_state == "main_menu" then
-    -- Set the font size
-    love.graphics.setFont(32)
-    -- For completly centered text
-    love.graphics.printf("LOVEly Snake", 0, max_height * 0.05, max_width, 'center')
-    
-    love.graphics.setFont(20)
-    for i = 1, #main_menu_items do
-      --print(max_height * (menu_item_loc + (menu_item_space * (i - 1))) .. " " .. max_height * (menu_item_loc + (menu_item_space * i)) .. " " .. mouse_y)
-      if mouse_y >= max_height * (menu_item_loc + (menu_item_space * (i - 1))) and mouse_y < max_height * (menu_item_loc + (menu_item_space * i)) then
-        love.graphics.setColor(colors.red)
-      else
-        love.graphics.setColor(colors.white)
-      end
-      love.graphics.printf(main_menu_items[i], 0, max_height * (menu_item_loc + (menu_item_space * (i - 1))), max_width, 'center')
-    end
-    --[[
-    if mouse_y >= max_height * menu_item_loc and mouse_y < max_height * (menu_item_loc + menu_item_space) then
-      love.graphics.setColor(colors.red)
-    else
-      love.graphics.setColor(colors.white)
-    end
-    love.graphics.printf("New Game", 0, max_height * menu_item_loc, max_width, 'center')
-    
-    if mouse_y >= max_height * 0.35 and mouse_y <= max_height * 0.39 then
-      love.graphics.setColor(colors.red)
-    else
-      love.graphics.setColor(colors.white)
-    end
-    love.graphics.printf("Options", 0, max_height * 0.35, max_width, 'center')
-    
-    if mouse_y >= max_height * 0.40 and mouse_y <= max_height * 0.44 then
-      love.graphics.setColor(colors.red)
-    else
-      love.graphics.setColor(colors.white)
-    end
-    love.graphics.printf("Quit", 0, max_height * 0.40, max_width, 'center')]]
-    
-    --love.graphics.print("Press enter to play...", max_width / 2, max_height / 2)
+    draw_main_menu(mouse_y)
   elseif game_state == "options_menu" then
-    love.graphics.setFont(32)
-    love.graphics.printf("Options", 0, max_height * 0.05, max_width, 'center')
-    love.graphics.setFont(20)
-    love.graphics.printf("Difficulty", 0, max_height * 0.30, max_width, 'center')
-    -- draw image buttons here
+    draw_options_menu(mouse_x, mouse_y)
   elseif game_state == "paused" then
     love.graphics.setColor(colors.white)
     love.graphics.print("PAUSED", max_width / 2, max_height / 2)
@@ -179,6 +160,24 @@ function love.mousereleased(x, y, button)
       if y >= max_height * 0.40 and y <= max_height * 0.44 then
         print("clicked quit")
       end
+    elseif game_state == "options_menu" then
+      for key, value in next, ui_items.difficulty_buttons, nil do
+        if key ~= "width" and key ~= "height" then
+          --print(key, value)
+          if click_inside(x, y, ui_items.difficulty_buttons[key].x_pos, ui_items.difficulty_buttons[key].y_pos, ui_items.difficulty_buttons.width, ui_items.difficulty_buttons.height) then
+            print("Clicked " .. key)
+            speed = difficulty[key] -- temporary
+          end
+          --for key1, value1 in next, ui_items.difficulty_buttons[key], nil do
+            --print(key1, value1)
+            --if click_inside(x, y, ui_items.difficulty_buttons["very_easy"].x_pos, ui_items.difficulty_buttons["very_easy"].y_pos, ui_items.difficulty_buttons.width, ui_items.difficulty_buttons.height) then
+            --end
+          --end
+        end
+      end
+--      if click_inside(x, y, ui_items.difficulty_buttons["very_easy"].x_pos, ui_items.difficulty_buttons["very_easy"].y_pos, ui_items.difficulty_buttons.width, ui_items.difficulty_buttons.height) then
+--        print("Clicked very easy")
+--      end
     end
   end
 end
@@ -239,83 +238,24 @@ function love.quit()
 end
 
 --
------ MENU FUNCTIONS -----
+----- OTHER FUNCS -----
 --
 
-function main_menu()
-end
-
---
------ SNAKE FUNCTIONS -----
---
-
-function move_snake(dt)
-  local old_x = snake_loc["head"]["x"]
-  local old_y = snake_loc["head"]["y"]
-  local temp
+-- checks to see if the click is inside a rectangle
+function click_inside(x_click, y_click, x_pos, y_pos, width, height)
+  local valid_x = false
+  local valid_y = false
   
-  if snake_direction == "up" then
-    snake_loc["head"]["y"] = snake_loc["head"]["y"] - block_size
+  if x_click >= x_pos and x_click < x_pos + width then
+    valid_x = true
   end
-  if snake_direction == "down" then
-    snake_loc["head"]["y"] = snake_loc["head"]["y"] + block_size
-  end
-  if snake_direction == "left" then
-    snake_loc["head"]["x"] = snake_loc["head"]["x"] - block_size
-  end
-  if snake_direction == "right" then
-    snake_loc["head"]["x"] = snake_loc["head"]["x"] + block_size
+  if y_click >= y_pos and y_click < y_pos + height then
+    valid_y = true
   end
   
-  check_collision()
-  
-  for key, value in pairs(snake_loc) do
-    if key ~= "head" then
-      temp = value.x
-      value.x = old_x
-      old_x = temp
-      
-      temp = value.y
-      value.y = old_y
-      old_y = temp
-    end
-  end
-end
-
-function check_collision()
-  -- Check collision with wall
-  if snake_loc["head"]["y"] > max_height or snake_loc["head"]["y"] < 0 then
-    print("Hit y wall")
-    kill_snake()
-  end
-  if snake_loc["head"]["x"] > max_width or snake_loc["head"]["x"] < 0 then
-    print("Hit x wall")
-    kill_snake()
-  end
-  
-  -- Check collision with body
-  
-  -- Check collision with food
-  if snake_loc["head"]["x"] == snake_food[1]["x"] and snake_loc["head"]["y"] == snake_food[1]["y"] then
-    print("Food colision")
-    table.remove(snake_food)
-    table.insert(snake_loc, {x=snake_loc["head"]["x"], y=snake_loc["head"]["y"]})
-  end
-end
-
-function kill_snake()
-end
-
---
------ FOOD FUNCTIONS -----
---
-
-function generate_food()
-  if next(snake_food) == nil then -- Table is empty
-    local random_x = block_size * math.random(0, (max_width - block_size) / block_size)
-    local random_y = block_size * math.random(0, (max_height - block_size) / block_size)
-    --snake_food = {x=random_x, y=random_y}
-    table.insert(snake_food, {x=random_x, y=random_y})
-    print("Food: " .. snake_food[1]["x"] .. " " .. snake_food[1]["y"])
+  if valid_x == true and valid_y == true then
+    return true
+  else
+    return false
   end
 end
