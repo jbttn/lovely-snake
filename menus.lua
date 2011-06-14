@@ -84,14 +84,13 @@ function draw_options_menu(mouse_x, mouse_y)
         --love.graphics.printf(ui_items.difficulty_str[i], max_width * (0.25 + (0.10 * (i - 1))), max_height * 0.36, max_width * 0.09, 'center')
         --love.graphics.rectangle( "line", max_width * (0.25 + (0.10 * (i - 1))), max_height * 0.35, max_width * 0.09, max_height * 0.05 )
       end
+      if speed == difficulty[key] then
+        love.graphics.setColor(colors.red)
+      else
+        love.graphics.setColor(colors.white)
+      end
+      love.graphics.printf("\n" .. str, x_pos, y_pos, ui_items.difficulty_buttons.width, 'center')
+      love.graphics.rectangle("line", x_pos, y_pos, ui_items.difficulty_buttons.width, ui_items.difficulty_buttons.height)
     end
-    --print(str, x_pos, y_pos * 1.01, max_height * 0.36)
-    if speed == difficulty[key] then
-      love.graphics.setColor(colors.red)
-    else
-      love.graphics.setColor(colors.white)
-    end
-    love.graphics.printf("\n" .. str, x_pos, y_pos, ui_items.difficulty_buttons.width, 'center') -- weird bug displaying hard and very_hard
-    --love.graphics.rectangle("line", x_pos, y_pos, ui_items.difficulty_buttons.width, ui_items.difficulty_buttons.height)
   end
 end

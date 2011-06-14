@@ -7,7 +7,7 @@
         * Main menu with options screen for difficulty and other options
         * Option to turn wall collision on or off
         * Option to change game colors?
-        * Mouse controls
+        * Mouse controls (snake travels twords cursor position)
         * Multiple food items? Powerups?
         * Score board with high scores
         * Sound effects?
@@ -65,7 +65,7 @@ function love.load()
     "Options",
     "Quit"
   }
-  
+  -- need to figure out a way to get rid of difficulty_str as it is redundant yet some menus depend on it
   ui_items = {
     difficulty_str = {
       "V.Easy",
@@ -86,7 +86,7 @@ function love.load()
   }
   
   block_size = 20 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
-  speed = difficulty.hard -- In milliseconds
+  speed = difficulty.menu -- In milliseconds
   menu_item_loc = 0.30
   menu_item_space = 0.05
 end
