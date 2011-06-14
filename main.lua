@@ -29,6 +29,8 @@ function love.load()
   max_height = 600
   game_state = "main_menu" -- main_menu, options_menu, running, paused, game_over
   
+  small_font = love.graphics.newFont(14)
+  
   x_start = max_width / 2
   y_start = max_height / 2
   
@@ -66,15 +68,30 @@ function love.load()
     "Quit"
   }
  
-  ui_items = {
-    difficulty_buttons = {
-      width = max_width * 0.09,
-      height = max_height * 0.05,
-      very_easy = {str="V.Easy", x_pos=max_width * 0.25, y_pos=max_height * 0.35},
-      easy = {str="Easy", x_pos=max_width * 0.35, y_pos=max_height * 0.35},
-      normal = {str="Normal", x_pos=max_width * 0.45, y_pos=max_height * 0.35},
-      hard = {str="Hard", x_pos=max_width * 0.55, y_pos=max_height * 0.35},
-      very_hard = {str="V.Hard", x_pos=max_width * 0.65, y_pos=max_height * 0.35}
+  ui = {
+    common = {
+      y_title_loc = max_height * 0.05, -- Vertical spacing of the title as a percentage from the top
+      y_first_loc = 0.30, -- Vertical location of the first menu item
+      y_vert_space = 0.05
+    },
+    main_menu = {
+      title = "LOVEly Snake",
+      "New Game",
+      "Options",
+      "Quit",
+      function () --[[print("test")]] end
+    },
+    options_menu = {
+      title = "Options",
+      difficulty_buttons = {
+        width = max_width * 0.09,
+        height = max_height * 0.05,
+        very_easy = {str="V.Easy", x_pos=max_width * 0.25, y_pos=max_height * 0.35},
+        easy = {str="Easy", x_pos=max_width * 0.35, y_pos=max_height * 0.35},
+        normal = {str="Normal", x_pos=max_width * 0.45, y_pos=max_height * 0.35},
+        hard = {str="Hard", x_pos=max_width * 0.55, y_pos=max_height * 0.35},
+        very_hard = {str="V.Hard", x_pos=max_width * 0.65, y_pos=max_height * 0.35}
+      }
     }
   }
   
@@ -106,7 +123,7 @@ function love.draw()
   local mouse_y = love.mouse.getY()
   
   if game_state == "main_menu" then
-    draw_main_menu(mouse_y)
+    draw_main_menu(mouse_x, mouse_y)
     
   elseif game_state == "options_menu" then
     draw_options_menu(mouse_x, mouse_y)
@@ -159,10 +176,13 @@ function love.mousereleased(x, y, button)
       end
       
     elseif game_state == "options_menu" then
-      for key, value in next, ui_items.difficulty_buttons, nil do
+      for key, value in next, ui.options_menu.difficulty_buttons, nil do
         if key ~= "width" and key ~= "height" then
           --print(key, value)
-          if click_inside(x, y, ui_items.difficulty_buttons[key].x_pos, ui_items.difficulty_buttons[key].y_pos, ui_items.difficulty_buttons.width, ui_items.difficulty_buttons.height) then
+          if mouse_inside("both", x, y, ui.options_menu.difficulty_buttons[key].x_pos,
+                          ui.options_menu.difficulty_buttons[key].y_pos,
+                          ui.options_menu.difficulty_buttons.width,
+                          ui.options_menu.difficulty_buttons.height) then
             print("Clicked " .. key)
             speed = difficulty[key] -- temporary
           end
@@ -202,6 +222,8 @@ function love.keypressed(key, unicode)
     max_width = 1024
     max_height = 768
     --love.graphics.translate( 200, 200 )
+  elseif key == 'm' then
+    display_menu_items(ui.main_menu, love.mouse.getX(), love.mouse.getY())
   end
 end
 
@@ -232,21 +254,32 @@ end
 ----- OTHER FUNCS -----
 --
 
--- checks to see if the click is inside a rectangle
-function click_inside(x_click, y_click, x_pos, y_pos, width, height)
+-- checks to see if the mosue is clicked or hovered inside a rectangle
+function mouse_inside(checking, x_mouse, y_mouse, x_pos, y_pos, width, height)
   local valid_x = false
   local valid_y = false
-  
-  if x_click >= x_pos and x_click < x_pos + width then
+
+  if x_mouse >= x_pos and x_mouse < x_pos + width then
     valid_x = true
   end
-  if y_click >= y_pos and y_click < y_pos + height then
+  if y_mouse >= y_pos and y_mouse < y_pos + height then
     valid_y = true
   end
   
-  if valid_x == true and valid_y == true then
-    return true
-  else
-    return false
+  if checking == "x_only" then
+    return valid_x
+  elseif checking == "y_only" then
+    return valid_y
+  elseif checking == "both" then
+    if valid_x == true and valid_y == true then
+      return true
+    else
+      return false
+    end
   end
+end
+
+-- string, y position
+function print_centered(s, y)
+  love.graphics.printf(s, 0, y, max_width, 'center')
 end
