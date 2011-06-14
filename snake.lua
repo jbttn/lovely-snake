@@ -3,10 +3,12 @@
 --
 
 function move_snake(dt)
+  -- Keep track of where the snake was
   local old_x = snake_loc["head"]["x"]
   local old_y = snake_loc["head"]["y"]
   local temp
   
+  -- Move the snakes head (the first block of the snake)
   if snake_direction == "up" then
     snake_loc["head"]["y"] = snake_loc["head"]["y"] - block_size
   end
@@ -22,6 +24,7 @@ function move_snake(dt)
   
   check_collision()
   
+  -- Move the rest of the snake
   for key, value in pairs(snake_loc) do
     if key ~= "head" then
       temp = value.x
@@ -68,6 +71,7 @@ function generate_food()
     local random_x = block_size * math.random(0, (max_width - block_size) / block_size)
     local random_y = block_size * math.random(0, (max_height - block_size) / block_size)
     --snake_food = {x=random_x, y=random_y}
+    -- Inserting this way means we can have multiple snake foods, maybe with different attributes
     table.insert(snake_food, {x=random_x, y=random_y})
     print("Food: " .. snake_food[1]["x"] .. " " .. snake_food[1]["y"])
   end

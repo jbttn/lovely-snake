@@ -33,7 +33,7 @@ function love.load()
   y_start = max_height / 2
   
   --snake_loc = {{x_start, y_start}}
-  snake_loc = {head={x=x_start, y=y_start},{x=1, y=1}}
+  snake_loc = {head={x=x_start, y=y_start}}
   snake_direction = "up"
   snake_food = {}
   
@@ -65,15 +65,8 @@ function love.load()
     "Options",
     "Quit"
   }
-  -- need to figure out a way to get rid of difficulty_str as it is redundant yet some menus depend on it
+ 
   ui_items = {
-    difficulty_str = {
-      "V.Easy",
-      "Easy",
-      "Normal",
-      "Hard",
-      "V.Hard"
-    },
     difficulty_buttons = {
       width = max_width * 0.09,
       height = max_height * 0.05,
@@ -114,26 +107,30 @@ function love.draw()
   
   if game_state == "main_menu" then
     draw_main_menu(mouse_y)
+    
   elseif game_state == "options_menu" then
     draw_options_menu(mouse_x, mouse_y)
+    
   elseif game_state == "paused" then
     love.graphics.setColor(colors.white)
-    love.graphics.print("PAUSED", max_width / 2, max_height / 2)
+    love.graphics.printf("PAUSED", 0, max_height / 2, max_width, 'center')
+    
   elseif game_state == "game_over" then
-    --game over
+    -- Game over
+    
   elseif game_state == "running" then
+    -- Draw the snake food
     if next(snake_food) ~= nil then
       love.graphics.setColor(colors.red)
       love.graphics.rectangle("fill", snake_food[1]["x"], snake_food[1]["y"], block_size, block_size)
       love.graphics.setColor(0, 0, 255, 255)
     end
     
+    -- Draw the snake body
     for key, value in pairs(snake_loc) do
-      --love.graphics.rectangle("fill", value[1], value[2], block_size, block_size)
       love.graphics.rectangle("fill", value.x, value.y, block_size, block_size)
-      --print("x = " .. value.x)
-      --print("y = " .. value.y)
     end
+    
   end
 end
 
@@ -145,8 +142,8 @@ end
 
 function love.mousereleased(x, y, button)
   if button == 'l' then
+    
     if game_state == "main_menu" then
-      --print(max_height * 0.30)
       --print("button 1 released at position " ..  x .. ", " .. y)
       if y >= max_height * 0.30 and y <= max_height * 0.34 then
         print("clicked new game")
@@ -160,6 +157,7 @@ function love.mousereleased(x, y, button)
       if y >= max_height * 0.40 and y <= max_height * 0.44 then
         print("clicked quit")
       end
+      
     elseif game_state == "options_menu" then
       for key, value in next, ui_items.difficulty_buttons, nil do
         if key ~= "width" and key ~= "height" then
@@ -168,17 +166,10 @@ function love.mousereleased(x, y, button)
             print("Clicked " .. key)
             speed = difficulty[key] -- temporary
           end
-          --for key1, value1 in next, ui_items.difficulty_buttons[key], nil do
-            --print(key1, value1)
-            --if click_inside(x, y, ui_items.difficulty_buttons["very_easy"].x_pos, ui_items.difficulty_buttons["very_easy"].y_pos, ui_items.difficulty_buttons.width, ui_items.difficulty_buttons.height) then
-            --end
-          --end
         end
       end
---      if click_inside(x, y, ui_items.difficulty_buttons["very_easy"].x_pos, ui_items.difficulty_buttons["very_easy"].y_pos, ui_items.difficulty_buttons.width, ui_items.difficulty_buttons.height) then
---        print("Clicked very easy")
---      end
     end
+    
   end
 end
 
