@@ -30,6 +30,8 @@ function love.load()
   game_state = "main_menu" -- main_menu, options_menu, running, paused, game_over
   
   small_font = love.graphics.newFont(14)
+  medium_font = love.graphics.newFont(20)
+  large_font = love.graphics.newFont(32)
   
   x_start = max_width / 2
   y_start = max_height / 2
@@ -72,29 +74,32 @@ function love.load()
     common = {
       y_title_loc = max_height * 0.05, -- Vertical spacing of the title as a percentage from the top
       y_first_loc = 0.30, -- Vertical location of the first menu item
-      y_vert_space = 0.05
+      y_vert_space = 0.06 -- changed from 0.05 to 0.06, test more
     },
     main_menu = {
       title = "LOVEly Snake",
       "New Game",
       "Options",
       "Quit",
-      function () --[[print("test")]] end
     },
     options_menu = {
       title = "Options",
       difficulty_buttons = {
         width = max_width * 0.09,
         height = max_height * 0.05,
-        very_easy = {str="V.Easy", x_pos=max_width * 0.25, y_pos=max_height * 0.35},
+        very_easy = {str="V.Easy", x_pos=max_width * 0.25, y_pos=max_height * 0.35}, -- these need to be updated on screen resize
         easy = {str="Easy", x_pos=max_width * 0.35, y_pos=max_height * 0.35},
         normal = {str="Normal", x_pos=max_width * 0.45, y_pos=max_height * 0.35},
         hard = {str="Hard", x_pos=max_width * 0.55, y_pos=max_height * 0.35},
         very_hard = {str="V.Hard", x_pos=max_width * 0.65, y_pos=max_height * 0.35}
-      }
+      },
+      "Difficulty",
+      function () display_horizontal_buttons() end, -- function to print difficulty buttons
+      "Back"
     }
   }
   
+  hovering_over = nil
   block_size = 20 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
   speed = difficulty.menu -- In milliseconds
   menu_item_loc = 0.30
@@ -157,21 +162,22 @@ function love.mousepressed(x, y, button)
   end
 end
 
-function love.mousereleased(x, y, button)
+function love.mousereleased(x, y, button) -- needs updated to work with menus, temp solution for now.
   if button == 'l' then
     
     if game_state == "main_menu" then
-      --print("button 1 released at position " ..  x .. ", " .. y)
-      if y >= max_height * 0.30 and y <= max_height * 0.34 then
+      if hovering_over == "New Game" then
         print("clicked new game")
         game_state = "running"
-        speed = difficulty.normal -- temporary
+        if speed == "menu" then
+          speed = difficulty.normal -- should set to options value from file
+        end
       end
-      if y >= max_height * 0.35 and y <= max_height * 0.39 then
+      if hovering_over == "Options" then
         print("clicked options")
         game_state = "options_menu"
       end
-      if y >= max_height * 0.40 and y <= max_height * 0.44 then
+      if hovering_over == "Quit" then
         print("clicked quit")
       end
       
@@ -187,6 +193,10 @@ function love.mousereleased(x, y, button)
             speed = difficulty[key] -- temporary
           end
         end
+      end
+      if hovering_over == "Back" then
+        print("clicked back")
+        game_state = "main_menu"
       end
     end
     
@@ -224,6 +234,10 @@ function love.keypressed(key, unicode)
     --love.graphics.translate( 200, 200 )
   elseif key == 'm' then
     display_menu_items(ui.main_menu, love.mouse.getX(), love.mouse.getY())
+  elseif key == 's' then
+    print(love.filesystem.getSaveDirectory())
+  elseif key == 'escape' then
+    game_state = "main_menu"
   end
 end
 
