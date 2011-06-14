@@ -179,6 +179,7 @@ function love.mousereleased(x, y, button) -- needs updated to work with menus, t
       end
       if hovering_over == "Quit" then
         print("clicked quit")
+        love.event.push('q')
       end
       
     elseif game_state == "options_menu" then
