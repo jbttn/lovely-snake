@@ -2,6 +2,13 @@
 ----- SNAKE FUNCTIONS -----
 --
 
+function init_snake()
+  --snake_loc = {{x_start, y_start}}
+  snake_loc = {head={x=x_start, y=y_start}}
+  snake_direction = "up"
+  snake_food = {}
+end
+
 function move_snake(dt)
   -- Keep track of where the snake was
   local old_x = snake_loc["head"]["x"]
@@ -42,11 +49,11 @@ function check_collision()
   -- Check collision with wall
   if snake_loc["head"]["y"] > max_height or snake_loc["head"]["y"] < 0 then
     print("Hit y wall")
-    kill_snake()
+    return kill_snake()
   end
   if snake_loc["head"]["x"] > max_width or snake_loc["head"]["x"] < 0 then
     print("Hit x wall")
-    kill_snake()
+    return kill_snake()
   end
   
   -- Check collision with body
@@ -60,6 +67,8 @@ function check_collision()
 end
 
 function kill_snake()
+  game_state = "main_menu"
+  init_snake()
 end
 
 --

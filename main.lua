@@ -36,10 +36,7 @@ function love.load()
   x_start = max_width / 2
   y_start = max_height / 2
   
-  --snake_loc = {{x_start, y_start}}
-  snake_loc = {head={x=x_start, y=y_start}}
-  snake_direction = "up"
-  snake_food = {}
+  init_snake()
   
   -- Disable key repeating
   love.keyboard.setKeyRepeat(0, 100)
@@ -115,6 +112,8 @@ function love.update(dt)
     return
   elseif game_state == "paused" then
     return
+  elseif game_state == "game_over" then
+    return
   end
   
   generate_food()
@@ -139,6 +138,7 @@ function love.draw()
     
   elseif game_state == "game_over" then
     -- Game over
+    draw_main_menu(mouse_x, mouse_y)
     
   elseif game_state == "running" then
     -- Draw the snake food
