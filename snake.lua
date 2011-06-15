@@ -57,6 +57,13 @@ function check_collision()
   end
   
   -- Check collision with body
+  for key, value in pairs(snake_loc) do
+    if key ~= "head" then
+      if snake_loc["head"]["x"] == value.x and snake_loc["head"]["y"] == value.y then
+        return kill_snake()
+      end
+    end
+  end
   
   -- Check collision with food
   if snake_loc["head"]["x"] == snake_food[1]["x"] and snake_loc["head"]["y"] == snake_food[1]["y"] then
