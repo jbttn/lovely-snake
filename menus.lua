@@ -50,7 +50,7 @@ function display_horizontal_buttons()
           y_pos = value1
         end
       end
-      if speed == difficulty[key] then
+      if current_difficulty == difficulty[key] then
         love.graphics.setColor(colors.red)
       else
         love.graphics.setColor(colors.white)

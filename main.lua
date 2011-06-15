@@ -5,6 +5,7 @@
         * Add countdown on unpause
         * Better way to handle game states
         * Main menu with options screen for difficulty and other options
+        * Keyboard controls on menus
         * Option to turn wall collision on or off
         * Option to change game colors?
         * Mouse controls (snake travels twords cursor position)
@@ -14,6 +15,7 @@
         * Clean up code
                                                                               ]]
 
+love.filesystem.load("engine.lua")()
 love.filesystem.load("menus.lua")()
 love.filesystem.load("snake.lua")()
 
@@ -60,12 +62,6 @@ function love.load()
     very_hard = 20,
     menu = 0
   }
-  
-  main_menu_items = {
-    "New game",
-    "Options",
-    "Quit"
-  }
  
   ui = {
     common = {
@@ -96,6 +92,13 @@ function love.load()
     }
   }
   
+  if love.filesystem.exists("options.cfg") then
+    love.filesystem.load("options.cfg")()
+  else
+    current_difficulty = difficulty.normal
+    update_options_file()
+  end
+  
   hovering_over = nil
   block_size = 20 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
   speed = difficulty.menu -- In milliseconds
@@ -107,6 +110,7 @@ function love.update(dt)
   love.timer.sleep(speed)
   
   if game_state == "main_menu" then
+    speed = difficulty.menu
     return
   elseif game_state == "options_menu" then
     return
@@ -115,6 +119,8 @@ function love.update(dt)
   elseif game_state == "game_over" then
     return
   end
+  
+  speed = current_difficulty
   
   generate_food()
   move_snake(dt)
@@ -170,7 +176,7 @@ function love.mousereleased(x, y, button) -- needs updated to work with menus, t
         print("clicked new game")
         game_state = "running"
         if speed == "menu" then
-          speed = difficulty.normal -- should set to options value from file
+          speed = current_difficulty -- should set to options value from file
         end
       end
       if hovering_over == "Options" then
@@ -191,7 +197,8 @@ function love.mousereleased(x, y, button) -- needs updated to work with menus, t
                           ui.options_menu.difficulty_buttons.width,
                           ui.options_menu.difficulty_buttons.height) then
             print("Clicked " .. key)
-            speed = difficulty[key] -- temporary
+            current_difficulty = difficulty[key]
+            update_options_file()
           end
         end
       end
