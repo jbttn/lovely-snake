@@ -36,18 +36,15 @@ function love.load()
   x_start = max_width / 2
   y_start = max_height / 2
   
-  --snake_loc = {{x_start, y_start}}
-  snake_loc = {head={x=x_start, y=y_start}}
-  snake_direction = "up"
-  snake_food = {}
+  init_snake()
   
   -- Disable key repeating
   love.keyboard.setKeyRepeat(0, 100)
   
   resolutions = {
-    {x=800, y=600},
-    {x=1024, y=768},
-    {x=1280, y=1024}
+    {current=true, x=800, y=600},
+    {current=false, x=1024, y=768},
+    {current=false, x=1280, y=1024}
   }
   
   colors = {
@@ -115,6 +112,8 @@ function love.update(dt)
     return
   elseif game_state == "paused" then
     return
+  elseif game_state == "game_over" then
+    return
   end
   
   generate_food()
@@ -139,6 +138,7 @@ function love.draw()
     
   elseif game_state == "game_over" then
     -- Game over
+    draw_main_menu(mouse_x, mouse_y)
     
   elseif game_state == "running" then
     -- Draw the snake food
@@ -212,13 +212,13 @@ function love.keypressed(key, unicode)
     else
       game_state = "running"
     end
-  elseif key == 'up' then
+  elseif key == 'up' and snake_direction ~= 'down' then
     snake_direction = "up"
-  elseif key == 'down' then
+  elseif key == 'down' and snake_direction ~= 'up' then
     snake_direction = "down"
-  elseif key == 'left' then
+  elseif key == 'left' and snake_direction ~= 'right' then
     snake_direction = "left"
-  elseif key == 'right' then
+  elseif key == 'right' and snake_direction ~= 'left' then
     snake_direction = "right"
   end
   
@@ -232,6 +232,23 @@ function love.keypressed(key, unicode)
     love.graphics.setMode( 1024, 768, false, true, 0 )
     max_width = 1024
     max_height = 768
+		for i = 1, #resolutions do
+			if resolutions[i].current == true and i ~= #resolutions then
+				resolutions[i].current = false
+				resolutions[i+1].current = true
+				love.graphics.setMode(resolutions[i+1].x, resolutions[i+1].y, false, true, 0)
+				max_width = resolutions[i+1].x
+				max_height = resolutions[i+1].y
+				break -- eww, might rewrite
+			elseif resolutions[i].current == true and i == #resolutions then
+				resolutions[i].current = false
+				resolutions[1].current = true
+				love.graphics.setMode(resolutions[1].x, resolutions[1].y, false, true, 0)
+				max_width = resolutions[1].x
+				max_height = resolutions[1].y
+				break
+			end
+		end
     --love.graphics.translate( 200, 200 )
   elseif key == 'm' then
     display_menu_items(ui.main_menu, love.mouse.getX(), love.mouse.getY())
