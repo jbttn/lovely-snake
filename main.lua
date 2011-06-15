@@ -229,9 +229,23 @@ function love.keypressed(key, unicode)
     table.remove(snake_loc) --pop?
   elseif key == 'g' then
     -- testing window resizing
-    love.graphics.setMode( 1024, 768, false, true, 0 )
-    max_width = 1024
-    max_height = 768
+		for i = 1, #resolutions do
+			if resolutions[i].current == true and i ~= #resolutions then
+				resolutions[i].current = false
+				resolutions[i+1].current = true
+				love.graphics.setMode(resolutions[i+1].x, resolutions[i+1].y, false, true, 0)
+				max_width = resolutions[i+1].x
+				max_height = resolutions[i+1].y
+				break -- eww, might rewrite
+			elseif resolutions[i].current == true and i == #resolutions then
+				resolutions[i].current = false
+				resolutions[1].current = true
+				love.graphics.setMode(resolutions[1].x, resolutions[1].y, false, true, 0)
+				max_width = resolutions[1].x
+				max_height = resolutions[1].y
+				break
+			end
+		end
     --love.graphics.translate( 200, 200 )
   elseif key == 'm' then
     display_menu_items(ui.main_menu, love.mouse.getX(), love.mouse.getY())
