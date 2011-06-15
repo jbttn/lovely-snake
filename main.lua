@@ -42,9 +42,9 @@ function love.load()
   love.keyboard.setKeyRepeat(0, 100)
   
   resolutions = {
-    {x=800, y=600},
-    {x=1024, y=768},
-    {x=1280, y=1024}
+    {current=true, x=800, y=600},
+    {current=false, x=1024, y=768},
+    {current=false, x=1280, y=1024}
   }
   
   colors = {
@@ -229,6 +229,9 @@ function love.keypressed(key, unicode)
     table.remove(snake_loc) --pop?
   elseif key == 'g' then
     -- testing window resizing
+    love.graphics.setMode( 1024, 768, false, true, 0 )
+    max_width = 1024
+    max_height = 768
 		for i = 1, #resolutions do
 			if resolutions[i].current == true and i ~= #resolutions then
 				resolutions[i].current = false
