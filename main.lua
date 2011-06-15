@@ -97,7 +97,7 @@ function love.load()
   }
   
   hovering_over = nil
-  block_size = 20 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
+  block_size = 50 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
   speed = difficulty.menu -- In milliseconds
   menu_item_loc = 0.30
   menu_item_space = 0.05

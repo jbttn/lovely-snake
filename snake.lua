@@ -47,7 +47,7 @@ end
 
 function check_collision()
   -- Check collision with wall
-  if snake_loc["head"]["y"] > max_height or snake_loc["head"]["y"] < 0 then
+  if snake_loc["head"]["y"] >= max_height or snake_loc["head"]["y"] < 0 then
     print("Hit y wall")
     return kill_snake()
   end
