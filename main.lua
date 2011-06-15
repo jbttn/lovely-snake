@@ -212,13 +212,13 @@ function love.keypressed(key, unicode)
     else
       game_state = "running"
     end
-  elseif key == 'up' then
+  elseif key == 'up' and snake_direction ~= 'down' then
     snake_direction = "up"
-  elseif key == 'down' then
+  elseif key == 'down' and snake_direction ~= 'up' then
     snake_direction = "down"
-  elseif key == 'left' then
+  elseif key == 'left' and snake_direction ~= 'right' then
     snake_direction = "left"
-  elseif key == 'right' then
+  elseif key == 'right' and snake_direction ~= 'left' then
     snake_direction = "right"
   end
   
