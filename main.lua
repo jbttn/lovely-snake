@@ -15,6 +15,12 @@
         * Clean up code
                                                                               ]]
 
+love.filesystem.load("lib/middleclass.lua")()
+
+love.filesystem.load("classes/engine/actor.lua")()
+love.filesystem.load("classes/engine/level.lua")()
+love.filesystem.load("classes/snake/snake.lua")()
+
 love.filesystem.load("engine.lua")()
 love.filesystem.load("menus.lua")()
 love.filesystem.load("snake.lua")()
@@ -35,8 +41,8 @@ function love.load()
   medium_font = love.graphics.newFont(20)
   large_font = love.graphics.newFont(32)
   
-  x_start = max_width / 2
-  y_start = max_height / 2
+  x_start = 0
+  y_start = 0
   
   init_snake()
   
@@ -45,8 +51,7 @@ function love.load()
   
   resolutions = {
     {current=true, x=800, y=600},
-    {current=false, x=1024, y=768},
-    {current=false, x=1280, y=1024}
+    {current=false, x=1440, y=700}
   }
   
   colors = {
@@ -100,10 +105,13 @@ function love.load()
   end
   
   hovering_over = nil
-  block_size = 20 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
+  block_size = 32 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
   speed = difficulty.menu -- In milliseconds
   menu_item_loc = 0.30
   menu_item_space = 0.05
+  
+  level = Level:new()
+  level:load_level('/resources/levels/snake_1.lua', 32, 32)
 end
 
 function love.update(dt)
@@ -124,9 +132,12 @@ function love.update(dt)
   
   generate_food()
   move_snake(dt)
+  level:update_level(dt)
 end
 
 function love.draw()
+  --love.graphics.scale(1.6, 1.5)
+  level:draw_level()
   love.graphics.setColor(colors.white)
   -- Get the current x,y locations of the mouse cursor
   local mouse_x = love.mouse.getX()
@@ -151,13 +162,15 @@ function love.draw()
     if next(snake_food) ~= nil then
       love.graphics.setColor(colors.red)
       love.graphics.rectangle("fill", snake_food[1]["x"], snake_food[1]["y"], block_size, block_size)
-      love.graphics.setColor(0, 0, 255, 255)
     end
     
     -- Draw the snake body
     for key, value in pairs(snake_loc) do
+      love.graphics.setColor(0, 0, 255, 255)
       love.graphics.rectangle("fill", value.x, value.y, block_size, block_size)
     end
+    
+    love.graphics.setColor(colors.white)
     
   end
 end
@@ -230,39 +243,41 @@ function love.keypressed(key, unicode)
   end
   
   -- Debug
-  if key == 'd' then
+  if key == 'i' then
     table.insert(snake_loc, {x=50, y=1}) --push?
   elseif key == 'r' then
     table.remove(snake_loc) --pop?
   elseif key == 'g' then
     -- testing window resizing
-    love.graphics.setMode( 1024, 768, false, true, 0 )
-    max_width = 1024
-    max_height = 768
-		for i = 1, #resolutions do
-			if resolutions[i].current == true and i ~= #resolutions then
-				resolutions[i].current = false
-				resolutions[i+1].current = true
-				love.graphics.setMode(resolutions[i+1].x, resolutions[i+1].y, false, true, 0)
-				max_width = resolutions[i+1].x
-				max_height = resolutions[i+1].y
-				break -- eww, might rewrite
-			elseif resolutions[i].current == true and i == #resolutions then
-				resolutions[i].current = false
-				resolutions[1].current = true
-				love.graphics.setMode(resolutions[1].x, resolutions[1].y, false, true, 0)
-				max_width = resolutions[1].x
-				max_height = resolutions[1].y
-				break
-			end
-		end
+    for i = 1, #resolutions do
+      if resolutions[i].current == true and i ~= #resolutions then
+        resolutions[i].current = false
+        resolutions[i+1].current = true
+        love.graphics.setMode(resolutions[i+1].x, resolutions[i+1].y, false, true, 0)
+        max_width = resolutions[i+1].x
+        max_height = resolutions[i+1].y
+        break -- eww, might rewrite
+      elseif resolutions[i].current == true and i == #resolutions then
+        resolutions[i].current = false
+        resolutions[1].current = true
+        love.graphics.setMode(resolutions[1].x, resolutions[1].y, false, true, 0)
+        max_width = resolutions[1].x
+        max_height = resolutions[1].y
+        break
+      end
+    end
     --love.graphics.translate( 200, 200 )
+  elseif key == 'f' then
+    love.graphics.toggleFullscreen( )
   elseif key == 'm' then
     display_menu_items(ui.main_menu, love.mouse.getX(), love.mouse.getY())
-  elseif key == 's' then
-    print(love.filesystem.getSaveDirectory())
   elseif key == 'escape' then
     game_state = "main_menu"
+  elseif key == 'w' then
+    --print(love.filesystem.getSaveDirectory())
+  elseif key == 'd' then
+    --act = Actor:new("testing")
+    --act:foobar()
   end
 end
 

@@ -3,9 +3,8 @@
 --
 
 function init_snake()
-  --snake_loc = {{x_start, y_start}}
   snake_loc = {head={x=x_start, y=y_start}}
-  snake_direction = "up"
+  snake_direction = "right"
   snake_food = {}
 end
 
@@ -29,6 +28,14 @@ function move_snake(dt)
     snake_loc["head"]["x"] = snake_loc["head"]["x"] + block_size
   end
   
+  print("snake loc", snake_loc["head"]["x"], snake_loc["head"]["y"])
+  local l_width, l_height = level:get_size()
+  local camera_x, camera_y = snake_loc["head"]["x"], snake_loc["head"]["y"]
+  camera_x = snake_loc["head"]["x"]
+  camera_y = snake_loc["head"]["y"]
+  --print("camera:  ", camera_x, camera_y)
+  level:set_x_y(camera_x, camera_y)
+  
   check_collision()
   
   -- Move the rest of the snake
@@ -46,14 +53,15 @@ function move_snake(dt)
 end
 
 function check_collision()
+  local l_width, l_height = level:get_size()
   -- Check collision with wall
   if snake_loc["head"]["y"] >= max_height or snake_loc["head"]["y"] < 0 then
     print("Hit y wall")
-    return kill_snake()
+    --return kill_snake()
   end
   if snake_loc["head"]["x"] > max_width or snake_loc["head"]["x"] < 0 then
     print("Hit x wall")
-    return kill_snake()
+    --return kill_snake()
   end
   
   -- Check collision with body
@@ -83,6 +91,7 @@ end
 --
 
 function generate_food()
+  local l_height, l_width = level:get_size()
   if next(snake_food) == nil then -- Table is empty
     local random_x = block_size * math.random(0, (max_width - block_size) / block_size)
     local random_y = block_size * math.random(0, (max_height - block_size) / block_size)
