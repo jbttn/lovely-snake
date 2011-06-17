@@ -41,8 +41,8 @@ function love.load()
   medium_font = love.graphics.newFont(20)
   large_font = love.graphics.newFont(32)
   
-  x_start = 0
-  y_start = 0
+  x_start = 32 * 12 --hardcoded, this should be set depending on resolution
+  y_start = 32 * 8
   
   init_snake()
   
@@ -129,10 +129,9 @@ function love.update(dt)
   end
   
   speed = current_difficulty
-  
+    level:update_level(dt)
   generate_food()
   move_snake(dt)
-  level:update_level(dt)
 end
 
 function love.draw()
@@ -158,16 +157,20 @@ function love.draw()
     draw_main_menu(mouse_x, mouse_y)
     
   elseif game_state == "running" then
+    --[[ -- drawing in level for now
     -- Draw the snake food
     if next(snake_food) ~= nil then
       love.graphics.setColor(colors.red)
       love.graphics.rectangle("fill", snake_food[1]["x"], snake_food[1]["y"], block_size, block_size)
-    end
+    end]]
     
     -- Draw the snake body
     for key, value in pairs(snake_loc) do
-      love.graphics.setColor(0, 0, 255, 255)
-      love.graphics.rectangle("fill", value.x, value.y, block_size, block_size)
+      love.graphics.setColor(75, 50, 175, 255)
+--love.graphics.print(key, 400, 200)
+--love.graphics.print(value.x, 400, 250)
+--love.graphics.print(value.y, 400, 300)
+      --love.graphics.rectangle("fill", value.x, value.y, block_size, block_size)
     end
     
     love.graphics.setColor(colors.white)
@@ -244,7 +247,9 @@ function love.keypressed(key, unicode)
   
   -- Debug
   if key == 'i' then
-    table.insert(snake_loc, {x=50, y=1}) --push?
+    local tmp = level:get_coords("world", snake_loc["head"]["x"], snake_loc["head"]["y"])
+    table.insert(snake_loc, {x=tmp.x * 32, y=tmp.y * 32, dir=snake_direction}) --push?
+    print("Inserted body at coords x: " .. tmp.x * 32 .. " y: " .. tmp.y * 32)
   elseif key == 'r' then
     table.remove(snake_loc) --pop?
   elseif key == 'g' then
