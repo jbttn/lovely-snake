@@ -1,18 +1,5 @@
 --[[
       LÖVEly Snake by Joshua Button
-      
-      TODOS:
-        * Add countdown on unpause
-        * Better way to handle game states
-        * Main menu with options screen for difficulty and other options
-        * Keyboard controls on menus
-        * Option to turn wall collision on or off
-        * Option to change game colors?
-        * Mouse controls (snake travels twords cursor position)
-        * Multiple food items? Powerups?
-        * Score board with high scores
-        * Sound effects?
-        * Clean up code
                                                                               ]]
 
 love.filesystem.load("lib/middleclass.lua")()
