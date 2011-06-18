@@ -19,7 +19,9 @@ love.filesystem.load("lib/middleclass.lua")()
 
 love.filesystem.load("classes/engine/actor.lua")()
 love.filesystem.load("classes/engine/level.lua")()
+love.filesystem.load("classes/engine/camera.lua")()
 love.filesystem.load("classes/snake/snake.lua")()
+love.filesystem.load("classes/snake/food.lua")()
 
 love.filesystem.load("engine.lua")()
 love.filesystem.load("menus.lua")()
@@ -109,9 +111,12 @@ function love.load()
   speed = difficulty.menu -- In milliseconds
   menu_item_loc = 0.30
   menu_item_space = 0.05
+  update_key = true -- only update the snakes direction after the update and draw functions are finished
   
   level = Level:new()
   level:load_level('/resources/levels/snake_1.lua', 32, 32)
+  camera = Camera:new()
+  snake = Snake:new()
 end
 
 function love.update(dt)
@@ -132,6 +137,8 @@ function love.update(dt)
     level:update_level(dt)
   generate_food()
   move_snake(dt)
+  
+  update_key = true
 end
 
 function love.draw()
@@ -163,14 +170,14 @@ function love.draw()
       love.graphics.setColor(colors.red)
       love.graphics.rectangle("fill", snake_food[1]["x"], snake_food[1]["y"], block_size, block_size)
     end]]
-    
+
     -- Draw the snake body
     for key, value in pairs(snake_loc) do
       love.graphics.setColor(75, 50, 175, 255)
 --love.graphics.print(key, 400, 200)
 --love.graphics.print(value.x, 400, 250)
 --love.graphics.print(value.y, 400, 300)
-      --love.graphics.rectangle("fill", value.x, value.y, block_size, block_size)
+      love.graphics.rectangle("fill", value.x, value.y, block_size, block_size - 10)
     end
     
     love.graphics.setColor(colors.white)
@@ -235,14 +242,18 @@ function love.keypressed(key, unicode)
     else
       game_state = "running"
     end
-  elseif key == 'up' and snake_direction ~= 'down' then
+  elseif key == 'up' and snake_direction ~= 'down' and update_key == true then -- random key spam can kill snake
     snake_direction = "up"
-  elseif key == 'down' and snake_direction ~= 'up' then
+    update_key = false
+  elseif key == 'down' and snake_direction ~= 'up' and update_key == true then
     snake_direction = "down"
-  elseif key == 'left' and snake_direction ~= 'right' then
+    update_key = false
+  elseif key == 'left' and snake_direction ~= 'right' and update_key == true then
     snake_direction = "left"
-  elseif key == 'right' and snake_direction ~= 'left' then
+    update_key = false
+  elseif key == 'right' and snake_direction ~= 'left' and update_key == true then
     snake_direction = "right"
+    update_key = false
   end
   
   -- Debug
@@ -278,8 +289,27 @@ function love.keypressed(key, unicode)
     display_menu_items(ui.main_menu, love.mouse.getX(), love.mouse.getY())
   elseif key == 'escape' then
     game_state = "main_menu"
-  elseif key == 'w' then
-    --print(love.filesystem.getSaveDirectory())
+  elseif key == 'n' then
+    cam = Camera:new()
+    cam:debug_print()
+    cam.bounds.north = 4
+    cam.bounds.east = 1
+    --cb = cam:get_bounds()
+    --print(cb.north, cb.south, cb.east, cb.west)
+    --cb.north = 5
+    --cb.east = 3
+    --cam:set_bounds(cb)
+    --print(cb.north, cb.south, cb.east, cb.west)
+    cam:debug_print()
+    
+    sn = Snake:new()
+    sn:debug_print()
+    sn.position.x = 99 -- works
+    print(sn.position.x)
+    sn:debug_print()
+    --Actor.update_position(sn, 0, 0) -- works
+    sn:update_position(0, 0) -- works
+    sn:debug_print()
   elseif key == 'd' then
     --act = Actor:new("testing")
     --act:foobar()
