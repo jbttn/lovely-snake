@@ -36,9 +36,9 @@ local tile_string = [[
 
 local quad_data = { 
   { '#',  0,  0 }, -- grass
-  { ' ',  32,  0 },
-  { '*',  0,  32 },
-  { 'f',  32,  32 },
+  { ' ',  32,  0 },-- trees
+  { '*',  0,  32 },-- rocks
+  { 'f',  32,  32 },-- flowers
 }
 
 level:new_level("/resources/images/tileset.png", tile_string, quad_data)
