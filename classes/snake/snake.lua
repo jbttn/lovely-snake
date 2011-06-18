@@ -4,26 +4,30 @@ Snake = class('Snake', Actor)
 
 function Snake:initialize()
   Actor.initialize(self) -- call the parent's constructor on self
-  self.body = {head={x=x_start, y=y_start}}
-  self.direction = "up"
-  --food.list = {} --food class?
+  --self.body = {head = {x = x_start, y = y_start}, {x = x_start, y = y_start}}
+  --self.direction = "right"
+  self:init()
 end
 
 function Snake:init()
-  self.body = {head={x=x_start, y=y_start, dir="right"}}
-  self.direction = "up"
-  --food.list = {}
+  self.body = {head = {x = x_start, y = y_start}, {x = x_start, y = y_start}}
+  self.direction = "right"
+  
+  -- reset level to position 0, 0
+  level.x = 0
+  level.y = 0
+  
+  camera:reset_bounds()
 end
 
-function Snake:move()
-  local pos = Actor.update_position(self.body["head"]["x"], self.body["head"]["y"])
+function Snake:move(dt)
   -- Keep track of where the snake was
-  local old_x = pos.x * block_size
-  local old_y = pos.y * block_size
+  local old_x = 0
+  local old_y = 0
   local temp
   
   -- Move the snakes head (the first block of the snake)
-  --camera:debug_print()
+  camera:debug_print()
   if self.direction == "up" and (camera.bounds.south > 0 or camera.bounds.north > 0) then
     self.body["head"]["y"] = self.body["head"]["y"] - block_size
     if camera.bounds.south > 0 then
@@ -46,27 +50,45 @@ function Snake:move()
     end
   end
   
+  local pos = Actor.update_position(self, self.body["head"]["x"], self.body["head"]["y"]) --read from actor.position instead?
+  old_x = pos.x * block_size
+  old_y = pos.y * block_size
   self:debug_print() -- lets see the location of the snake
-  check_collision(pos)
+  self:check_collision(pos)
+  
+  for key, value in pairs(self.body) do
+    if key ~= "head" then
+      temp = value.x
+      value.x = old_x
+      old_x = temp
+      
+      temp = value.y
+      value.y = old_y
+      old_y = temp
+--print(key .. " loc on map       ", value.x, value.y)
+    end
+  end
 end
 
 function Snake:check_collision(pos)
+  --local pos = level:get_coords("world", self.body["head"]["x"], self.body["head"]["y"])-- Actor.update_position(self, self.body["head"]["x"], self.body["head"]["y"]) --read from actor.position instead?
+  
   -- Check collision with wall
   if self.body["head"]["y"] >= max_height or self.body["head"]["y"] < 0 then
     print("Hit y wall")
-    return kill_snake()
+    return self:kill()
   end
   if self.body["head"]["x"] > max_width or self.body["head"]["x"] < 0 then
     print("Hit x wall")
-    return kill_snake()
+    return self:kill()
   end
   
   -- Check collision with body
   for key, value in pairs(self.body) do
     if key ~= "head" then
       if pos.x * block_size == value.x and pos.y * block_size == value.y then
-print("Body collision at x: " .. value.x .. " y: " .. value.y, pos.x * block_size, pos.y * block_size, key)
-        return kill_snake()
+--print("Body collision at x: " .. value.x .. " y: " .. value.y, pos.x * block_size, pos.y * block_size, key)
+        return self:kill()
       end
     end
   end
@@ -80,7 +102,7 @@ print("Body collision at x: " .. value.x .. " y: " .. value.y, pos.x * block_siz
 --print("SNAKE BODY INSERTED AT: ", self.body["head"]["x"], self.body["head"]["y"])
     --table.insert(self.body, {x=self.body["head"]["x"], y=self.body["head"]["y"], dir=snake_direction})
 --print("SNAKE BODY INSERTED AT: ", pos.x * 32, pos.y * 32)
-    table.insert(self.body, {x = pos.x * block_size, y = pos.y * blcok_size})
+    table.insert(self.body, {x = pos.x * block_size, y = pos.y * block_size})
   end
 end
 
@@ -90,11 +112,11 @@ function Snake:kill()
 end
 
 function Snake:debug_print()
-  print(self.position.x, self.position.y)
-  local pos = Actor.update_position(self, self.body["head"]["x"], self.body["head"]["y"])
-  local head_world_coords = level:get_coords("world", self.body["head"]["x"], self.body["head"]["y"])
+  --print(self.position.x, self.position.y)
+  --local pos = Actor.update_position(self, self.body["head"]["x"], self.body["head"]["y"])
+  --local head_world_coords = level:get_coords("world", self.body["head"]["x"], self.body["head"]["y"])
   
-  print("Snake location on level", head_world_coords.x * block_size, head_world_coords.y * block_size) -- block size neeeds to be defined in the engine?
+  --print("Snake location on level", head_world_coords.x * block_size, head_world_coords.y * block_size) -- block size neeeds to be defined in the engine?
 end
 
 

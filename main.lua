@@ -25,7 +25,6 @@ love.filesystem.load("classes/snake/food.lua")()
 
 love.filesystem.load("engine.lua")()
 love.filesystem.load("menus.lua")()
-love.filesystem.load("snake.lua")()
 
 --
 ----- LOVE FUNCTIONS -----
@@ -46,8 +45,6 @@ function love.load()
   x_start = 32 * 12 --hardcoded, this should be set depending on resolution
   y_start = 32 * 8
   
-  init_snake()
-  
   -- Disable key repeating
   love.keyboard.setKeyRepeat(0, 100)
   
@@ -58,15 +55,16 @@ function love.load()
   
   colors = {
     red = {200, 0, 70, 255},
-    white = {255, 255, 255, 255}
+    white = {255, 255, 255, 255},
+    black = {0, 0, 0, 255}
   }
-  
+
   difficulty = {
-    very_easy = 400,
-    easy = 200,
-    normal = 100,
-    hard = 50,
-    very_hard = 20,
+    very_easy = 0.20,
+    easy = 0.15,
+    normal = 0.10,
+    hard = 0.04,
+    very_hard = 0.02,
     menu = 0
   }
  
@@ -112,18 +110,17 @@ function love.load()
   menu_item_loc = 0.30
   menu_item_space = 0.05
   update_key = true -- only update the snakes direction after the update and draw functions are finished
+  time_stamp = os.clock()
   
   level = Level:new()
   level:load_level('/resources/levels/snake_1.lua', 32, 32)
   camera = Camera:new()
   snake = Snake:new()
+  food = Food:new()
 end
 
-function love.update(dt)
-  love.timer.sleep(speed)
-  
+function love.update(dt)  
   if game_state == "main_menu" then
-    speed = difficulty.menu
     return
   elseif game_state == "options_menu" then
     return
@@ -134,16 +131,29 @@ function love.update(dt)
   end
   
   speed = current_difficulty
-    level:update_level(dt)
-  generate_food()
-  move_snake(dt)
+  
+  local new_time_stamp = os.clock()
+  if (new_time_stamp - time_stamp) < speed then
+    return
+  else
+    time_stamp = new_time_stamp
+  end
+  
+  level:update_level(dt)
+  food:generate()
+  snake:move(dt)
   
   update_key = true
 end
 
 function love.draw()
-  --love.graphics.scale(1.6, 1.5)
-  level:draw_level()
+  --x = os.clock()
+  level:draw_level() -- slowing down framerate
+  --print(string.format("elapsed time: %.10f\n", os.clock() - x))
+  
+  love.graphics.setColor({30, 40, 80, 255})
+  love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 20)
+  
   love.graphics.setColor(colors.white)
   -- Get the current x,y locations of the mouse cursor
   local mouse_x = love.mouse.getX()
@@ -172,12 +182,12 @@ function love.draw()
     end]]
 
     -- Draw the snake body
-    for key, value in pairs(snake_loc) do
+    for key, value in pairs(snake.body) do
       love.graphics.setColor(75, 50, 175, 255)
 --love.graphics.print(key, 400, 200)
 --love.graphics.print(value.x, 400, 250)
 --love.graphics.print(value.y, 400, 300)
-      love.graphics.rectangle("fill", value.x, value.y, block_size, block_size - 10)
+      --love.graphics.rectangle("fill", value.x, value.y, block_size, block_size - 10)
     end
     
     love.graphics.setColor(colors.white)
@@ -198,6 +208,7 @@ function love.mousereleased(x, y, button) -- needs updated to work with menus, t
       if hovering_over == "New Game" then
         print("clicked new game")
         game_state = "running"
+        snake:init() -- need to reset camera position...might need the idea of a spawn point on levels
         if speed == "menu" then
           speed = current_difficulty -- should set to options value from file
         end
@@ -242,27 +253,27 @@ function love.keypressed(key, unicode)
     else
       game_state = "running"
     end
-  elseif key == 'up' and snake_direction ~= 'down' and update_key == true then -- random key spam can kill snake
-    snake_direction = "up"
+  elseif key == 'up' and snake.direction ~= 'down' and update_key == true then -- random key spam can kill snake
+    snake.direction = "up"
     update_key = false
-  elseif key == 'down' and snake_direction ~= 'up' and update_key == true then
-    snake_direction = "down"
+  elseif key == 'down' and snake.direction ~= 'up' and update_key == true then
+    snake.direction = "down"
     update_key = false
-  elseif key == 'left' and snake_direction ~= 'right' and update_key == true then
-    snake_direction = "left"
+  elseif key == 'left' and snake.direction ~= 'right' and update_key == true then
+    snake.direction = "left"
     update_key = false
-  elseif key == 'right' and snake_direction ~= 'left' and update_key == true then
-    snake_direction = "right"
+  elseif key == 'right' and snake.direction ~= 'left' and update_key == true then
+    snake.direction = "right"
     update_key = false
   end
   
   -- Debug
   if key == 'i' then
-    local tmp = level:get_coords("world", snake_loc["head"]["x"], snake_loc["head"]["y"])
-    table.insert(snake_loc, {x=tmp.x * 32, y=tmp.y * 32, dir=snake_direction}) --push?
+    local tmp = level:get_coords("world", snake.body["head"]["x"], snake.body["head"]["y"])
+    table.insert(snake.body, {x=tmp.x * 32, y=tmp.y * 32}) --push?
     print("Inserted body at coords x: " .. tmp.x * 32 .. " y: " .. tmp.y * 32)
   elseif key == 'r' then
-    table.remove(snake_loc) --pop?
+    table.remove(snake.body) --pop?
   elseif key == 'g' then
     -- testing window resizing
     for i = 1, #resolutions do

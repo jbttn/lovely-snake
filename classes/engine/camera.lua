@@ -4,15 +4,23 @@ function Camera:initialize()
   self.bounds = {north = 0, south = 0, east = 0, west = 0}
 end
 
+function Camera:reset_bounds()
+  self.bounds.north = 0
+  self.bounds.south = 0
+  self.bounds.east = 0
+  self.bounds.west = 0
+end
+
+-- called when the camera bumps into the level boundry
 function Camera:hit_bounds(direction)
   if direction == "north" then
-    north = north + 1
+    self.bounds.north = self.bounds.north + 1
   elseif direction == "south" then
-    south = south + 1
+    self.bounds.south = self.bounds.south + 1
   elseif direction == "east" then
-    east = east + 1
+    self.bounds.east = self.bounds.east + 1
   elseif direction == "west" then
-    west = west + 1
+    self.bounds.west = self.bounds.west + 1
   end
 end
 

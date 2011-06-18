@@ -12,4 +12,6 @@ function Actor:update_position(x, y) -- TEST THIS
   
   self.position.x = coords.x
   self.position.y = coords.y
+  
+  return coords
 end

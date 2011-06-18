@@ -1,3 +1,5 @@
+# LOVEly Snake by Joshua Button
+
 A snake clone built using the LOVE2d framework.
 
-To run first install the love framework at http://love2d.org/.  Then run either love C:\path\to\snake_game_folder on windows or love /path/to/snake_game on linux
+To run first install the love framework at http://love2d.org/.  Then run either love C:\path\to\snake_game_folder on windows or love /path/to/snake_game on linux.

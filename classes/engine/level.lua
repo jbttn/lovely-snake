@@ -90,22 +90,22 @@ function Level:draw_level()
       -- Note that this condition block allows us to go beyond the edge of the map.
       if y + first_tile_y >= 1 and y + first_tile_y <= self.height and x + first_tile_x >= 1 and x + first_tile_x <= self.width then
         love.graphics.drawq(tile_img, self.quads[self.level_table[x + first_tile_x][y + first_tile_y]], (x * self.tile_w) - offset_x - self.tile_w, (y * self.tile_h) - offset_y - self.tile_h)
-                
-        --iterate through snake food table and draw if on screen
-        if next(snake_food) ~= nil then
-          love.graphics.setColor(colors.red)
-          love.graphics.rectangle("fill", snake_food[1]["x"] - first_tile_x * 32, snake_food[1]["y"] - first_tile_y * 32, block_size, block_size)
-          love.graphics.setColor(colors.white)
-        end
-        
-        -- iterate through the snake body and draw it
-        for key, value in ipairs(snake_loc) do -- use ipairs because if we draw the head it will only show up in the top left of the level
-          love.graphics.setColor(75, 50, 100, 255)
-          love.graphics.rectangle("fill", value.x - first_tile_x * 32, value.y - first_tile_y * 32, block_size, block_size)
-          love.graphics.setColor(colors.white)
-        end
       end
     end
+  end
+  
+  --iterate through snake food table and draw if on screen
+  if next(food.list) ~= nil then
+    love.graphics.setColor(colors.red)
+    love.graphics.rectangle("fill", food.list[1]["x"] - first_tile_x * 32, food.list[1]["y"] - first_tile_y * 32, block_size, block_size)
+    love.graphics.setColor(colors.white)
+  end
+  
+  -- iterate through the snake body and draw it
+  for key, value in ipairs(snake.body) do -- use ipairs because if we draw the head it will only show up in the top left of the level
+    love.graphics.setColor(75, 50, 100, 255)
+    love.graphics.rectangle("fill", value.x - first_tile_x * 32, value.y - first_tile_y * 32, block_size, block_size)
+    love.graphics.setColor(colors.white)
   end
 end
 
@@ -132,23 +132,23 @@ function Level:update_level(dt)
   
   -- testing
   
-  if snake_direction == "up" then
-    if south == 0 then
+  if snake.direction == "up" then
+    if camera.bounds.south == 0 then
       self.y = self.y - block_size
     end
   end
-  if snake_direction == "down" then
-    if north == 0 then
+  if snake.direction == "down" then
+    if camera.bounds.north == 0 then
       self.y = self.y + block_size
     end
   end
-  if snake_direction == "left" then
-    if east == 0 then
+  if snake.direction == "left" then
+    if camera.bounds.east == 0 then
       self.x = self.x - block_size
     end
   end
-  if snake_direction == "right" then
-    if west == 0 then
+  if snake.direction == "right" then
+    if camera.bounds.west == 0 then
       self.x = self.x + block_size
     end
   end
@@ -159,22 +159,22 @@ print("level x: ", self.x, "level y: ", self.y)
 
   if self.x < 0 then
     self.x = 0
-    print("Level wall west")
+    print("Level bounds west")
     camera:hit_bounds("west") -- increment west var, only decremnt when user moves opposite direction
   end
   if self.y < 0 then
     self.y = 0
-    print("Level wall north")
+    print("Level bounds north")
     camera:hit_bounds("north")
   end 
   if self.x > self.width * self.tile_w - self.screen_width * self.tile_w then
     self.x = self.width * self.tile_w - self.screen_width * self.tile_w
-    print("Level wall east")
+    print("Level bounds east")
     camera:hit_bounds("east")
   end
   if self.y > self.height * self.tile_h - self.screen_height * self.tile_h then
     self.y = self.height * self.tile_h - self.screen_height * self.tile_h
-    print("Level wall south")
+    print("Level bounds south")
     camera:hit_bounds("south")
   end
   
@@ -223,12 +223,12 @@ function Level:get_coords(type_of_coords, x_pos, y_pos)
 end
 -- get size of whats displayed on the screen
 function Level:get_size()
-  print("size: " .. (self.width * self.tile_w) - (self.screen_width * self.tile_w) .. " " .. (self.height * self.tile_h) - (self.screen_height * self.tile_h) )
+  --print("size: " .. (self.width * self.tile_w) - (self.screen_width * self.tile_w) .. " " .. (self.height * self.tile_h) - (self.screen_height * self.tile_h) )
   return (self.width * self.tile_w) - (self.screen_width * self.tile_w), (self.height * self.tile_h) - (self.screen_height * self.tile_h)
 end
 -- get size of the entire level
 function Level:get_level_size()
-  print("size: " .. (self.width * self.tile_w) .. " " .. (self.height * self.tile_h))
+  --print("size: " .. (self.width * self.tile_w) .. " " .. (self.height * self.tile_h))
   return {width = (self.width * self.tile_w), height = (self.height * self.tile_h)}
 end
 
@@ -246,10 +246,10 @@ function Level:is_scrolling(direction)
   local x_is = false
   local y_is = false
   
-  if north == 0 and south == 0 then
+  if camera.bounds.north == 0 and camera.bounds.south == 0 then
     y_is = true
   end
-  if east == 0 and west == 0 then
+  if camera.bounds.east == 0 and camera.bounds.west == 0 then
     x_is = true
   end
   
@@ -263,6 +263,7 @@ function Level:is_scrolling(direction)
 end
 
 function Level:debug_print()
+  level_size = self:get_level_size()
   print("Level size: w: " .. level_size.width .. " h: " ..  level_size.height)
 end
 
