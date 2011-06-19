@@ -78,7 +78,12 @@ function love.load()
       title = "LOVEly Snake",
       "New Game",
       "Options",
-      "Quit",
+      "Quit"
+    },
+    game_over_menu = {
+      title = "Game Over",
+      "Try Again",
+      "Main Menu"
     },
     options_menu = {
       title = "Options",
@@ -104,6 +109,13 @@ function love.load()
     update_options_file()
   end
   
+  if love.filesystem.exists("high_score.cfg") then
+    love.filesystem.load("high_score.cfg")()
+  else
+    high_score = 0
+    update_high_score_file()
+  end
+  
   hovering_over = nil
   block_size = 32 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
   speed = difficulty.menu -- In milliseconds
@@ -117,6 +129,7 @@ function love.load()
   camera = Camera:new()
   snake = Snake:new()
   food = Food:new()
+  score = 0
 end
 
 function love.update(dt)  
@@ -170,8 +183,10 @@ function love.draw()
     love.graphics.printf("PAUSED", 0, max_height / 2, max_width, 'center')
     
   elseif game_state == "game_over" then
-    -- Game over
-    draw_main_menu(mouse_x, mouse_y)
+    if(score > high_score) then
+      update_high_score_file()
+    end
+    draw_game_over_menu(mouse_x, mouse_y)
     
   elseif game_state == "running" then
     --[[ -- drawing in level for now
@@ -221,7 +236,16 @@ function love.mousereleased(x, y, button) -- needs updated to work with menus, t
         print("clicked quit")
         love.event.push('q')
       end
-      
+    elseif game_state == "game_over" then  
+      if hovering_over == "Try Again" then
+        print("clicked Try Again")
+        game_state = "running"
+        snake:init() -- need to reset camera position...might need the idea of a spawn point on levels
+      end
+      if hovering_over == "Main Menu" then
+        print("clicked main menu")
+        game_state = "main_menu"
+      end
     elseif game_state == "options_menu" then
       for key, value in next, ui.options_menu.difficulty_buttons, nil do
         if key ~= "width" and key ~= "height" then

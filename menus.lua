@@ -7,6 +7,10 @@ function draw_options_menu(mouse_x, mouse_y)
   display_menu_items(ui.options_menu, mouse_x, mouse_y)
 end
 
+function draw_game_over_menu(mouse_x, mouse_y)
+  display_menu_items(ui.game_over_menu, mouse_x, mouse_y)
+end
+
 function display_menu_items(t, mouse_x, mouse_y)
   -- take in table and iterate through it displaying each item on a new line
   for key, value in next, t, nil do
