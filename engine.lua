@@ -5,7 +5,7 @@ function update_options_file()
 end
 
 function update_high_score_file()
-  local file_string = "high_score = " .. tostring(score) .. "\n"
+  local file_string = "high_score = " .. score .. "\n"
   love.filesystem.write("high_score.cfg", file_string, all)
 end
 

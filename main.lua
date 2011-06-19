@@ -109,6 +109,7 @@ function love.load()
     update_options_file()
   end
   
+  score = 0
   if love.filesystem.exists("high_score.cfg") then
     love.filesystem.load("high_score.cfg")()
   else
@@ -129,7 +130,6 @@ function love.load()
   camera = Camera:new()
   snake = Snake:new()
   food = Food:new()
-  score = 0
 end
 
 function love.update(dt)  
@@ -140,6 +140,11 @@ function love.update(dt)
   elseif game_state == "paused" then
     return
   elseif game_state == "game_over" then
+    if(score > high_score) then
+      update_high_score_file()
+      high_score = score
+    end
+    score = 0
     return
   end
   
@@ -150,6 +155,10 @@ function love.update(dt)
     return
   else
     time_stamp = new_time_stamp
+  end
+  
+  if score > high_score then
+    high_score = score
   end
   
   level:update_level(dt)
@@ -166,6 +175,8 @@ function love.draw()
   
   love.graphics.setColor({30, 40, 80, 255})
   love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 20)
+  love.graphics.print("HIGH SCORE: " .. high_score, 10, 50)
+  love.graphics.print("SCORE: " .. score, 10, 80)
   
   love.graphics.setColor(colors.white)
   -- Get the current x,y locations of the mouse cursor
@@ -183,9 +194,6 @@ function love.draw()
     love.graphics.printf("PAUSED", 0, max_height / 2, max_width, 'center')
     
   elseif game_state == "game_over" then
-    if(score > high_score) then
-      update_high_score_file()
-    end
     draw_game_over_menu(mouse_x, mouse_y)
     
   elseif game_state == "running" then
