@@ -103,11 +103,12 @@ function Snake:check_collision(pos)
     --table.insert(self.body, {x=self.body["head"]["x"], y=self.body["head"]["y"], dir=snake_direction})
 --print("SNAKE BODY INSERTED AT: ", pos.x * 32, pos.y * 32)
     table.insert(self.body, {x = pos.x * block_size, y = pos.y * block_size})
+    score = score + (100 * (1 - (current_difficulty*4)))-- score is dependent on difficulty level
   end
 end
 
 function Snake:kill()
-  game_state = "main_menu"
+  game_state = "game_over"
   self:init()
 end
 
