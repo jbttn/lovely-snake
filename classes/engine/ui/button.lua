@@ -6,7 +6,7 @@ function Button:initialize(centered, l, p)
   self.size = {w = medium_font:getWidth(self.label), h = medium_font:getHeight()}
 
   if centered then
-    self.position.x = self:center()
+    self:center()
   end
 end
 
@@ -47,6 +47,14 @@ function Button:selected()
   if game_state == "difficulty_menu" then
     for key, value in next, ui.difficulty_menu, nil do
       if current_difficulty == value.option then
+        return value
+      end
+    end
+  end
+
+  if game_state == "resolutions_menu" then
+    for key, value in next, ui.resolutions_menu, nil do
+      if max_width == value.width and max_height == value.height then
         return value
       end
     end

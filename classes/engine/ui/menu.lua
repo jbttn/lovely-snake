@@ -23,6 +23,7 @@ end
 
 function Menu:update(mouse_x, mouse_y)
   for key, value in ipairs(self.buttons) do
+    value:center()
     value:update(mouse_x, mouse_y)
   end
 end

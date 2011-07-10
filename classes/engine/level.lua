@@ -37,8 +37,8 @@ function Level:load_level(path, tile_w, tile_h)
   
   local res = get_current_resolution()
   
-  self.screen_width = res.x / 32 -- this should be the resolution, needs to be updated on res change
-  self.screen_height = res.y / 32
+  self.screen_width = res.width / 32 -- this should be the resolution, needs to be updated on res change
+  self.screen_height = res.height / 32
   
   love.filesystem.load(path)()
 end
@@ -180,8 +180,8 @@ print("level x: ", self.x, "level y: ", self.y)
   
   -- TEMP FOR TESTING, should only update on resolution change, not all the time
   local res = get_current_resolution()
-  self.screen_width = res.x / 32 -- this should be the resolution, needs to be updated on res change
-  self.screen_height = res.y / 32
+  self.screen_width = res.width / 32 -- this should be the resolution, needs to be updated on res change
+  self.screen_height = res.height / 32
 end
 
 -- takes in x and y positions in pixel coordinates from 0 - screen width / height and returns level coordinates corisponding to the screen or the entire level

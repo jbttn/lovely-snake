@@ -22,10 +22,8 @@ love.filesystem.load("menus.lua")()
 function love.load()
   math.randomseed(os.time())
   math.random() -- Numbers wont be random on the first call for some reason
-  
-  max_width = 800
-  max_height = 600
-  game_state = "main_menu" -- main_menu, options_menu, difficulty_menu, running, paused, game_over
+
+  game_state = "main_menu" -- main_menu, options_menu, difficulty_menu, resolutions_menu, running, paused, game_over
   
   small_font = love.graphics.newFont(14)
   medium_font = love.graphics.newFont(20)
@@ -36,11 +34,6 @@ function love.load()
   
   -- Disable key repeating
   love.keyboard.setKeyRepeat(0, 100)
-  
-  resolutions = {
-    {current=true, x=800, y=600},
-    {current=false, x=1440, y=700}
-  }
   
   colors = {
     red = {200, 0, 70, 255},
@@ -58,6 +51,7 @@ function love.load()
     options_menu = {
       title = "Options",
       "Difficulty",
+      "Resolutions",
       "Back"
     },
     difficulty_menu = {
@@ -67,6 +61,13 @@ function love.load()
       {label = "Normal", option = 0.10},
       {label = "Hard", option = 0.04},
       {label = "Very Hard", option = 0.02},
+      "Back"
+    },
+    resolutions_menu = {
+      title = "Resolutions",
+      {label = "800 x 600", width = 800, height = 600},
+      {label = "1024 x 768", width = 1024, height = 768},
+      {label = "1920 x 1080", width = 1920, height = 1080},
       "Back"
     },
     game_over_menu = {
@@ -79,9 +80,7 @@ function love.load()
   load_files()
   
   hovering_over = nil
-  block_size = 32 -- Just realized this only works with 10,20,25,50,100 need to think more on collision and resolution
-  menu_item_loc = 0.30
-  menu_item_space = 0.05
+  block_size = 32
   update_key = true -- only update the snakes direction after the update and draw functions are finished
   time_stamp = os.clock()
   
@@ -93,6 +92,7 @@ function love.load()
   main_menu = Menu:new(ui.main_menu)
   options_menu = Menu:new(ui.options_menu)
   difficulty_menu = Menu:new(ui.difficulty_menu)
+  resolutions_menu = Menu:new(ui.resolutions_menu)
   game_over_menu = Menu:new(ui.game_over_menu)
   bttn = Button:new(true, "WTF")
 end
@@ -105,10 +105,16 @@ function love.update(dt)
     main_menu:update(mouse_x, mouse_y)
     return
   elseif game_state == "options_menu" then
+    options_menu:update(mouse_x, mouse_y)
     return
   elseif game_state == "difficulty_menu" then
+    difficulty_menu:update(mouse_x, mouse_y)
+    return
+  elseif game_state == "resolutions_menu" then
+    resolutions_menu:update(mouse_x, mouse_y)
     return
   elseif game_state == "game_over" then
+    game_over_menu:update(mouse_x, mouse_y)
     if(score >= high_score) then
       update_high_score_file()
       high_score = score
@@ -153,6 +159,9 @@ function love.draw()
 
   elseif game_state == "difficulty_menu" then
     difficulty_menu:draw(mouse_x, mouse_y)
+
+  elseif game_state == "resolutions_menu" then
+    resolutions_menu:draw(mouse_x, mouse_y)
     
   elseif game_state == "game_over" then
     love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 20)
@@ -212,6 +221,8 @@ function love.mousereleased(x, y, button) -- needs updated to work with menus, t
       options_menu:clicked(x, y)
     elseif game_state == "difficulty_menu" then
       difficulty_menu:clicked(x, y)
+    elseif game_state == "resolutions_menu" then
+      resolutions_menu:clicked(x, y)
     end
     
   end
@@ -225,7 +236,7 @@ function love.keypressed(key, unicode)
     else
       game_state = "running"
     end
-  elseif key == 'up' and snake.direction ~= 'down' and update_key == true then -- random key spam can kill snake
+  elseif key == 'up' and snake.direction ~= 'down' and update_key == true then
     snake.direction = "up"
     update_key = false
   elseif key == 'down' and snake.direction ~= 'up' and update_key == true then
@@ -247,25 +258,7 @@ function love.keypressed(key, unicode)
   elseif key == 'r' then
     table.remove(snake.body) --pop?
   elseif key == 'g' then
-    -- testing window resizing
-    for i = 1, #resolutions do
-      if resolutions[i].current == true and i ~= #resolutions then
-        resolutions[i].current = false
-        resolutions[i+1].current = true
-        love.graphics.setMode(resolutions[i+1].x, resolutions[i+1].y, false, true, 0)
-        max_width = resolutions[i+1].x
-        max_height = resolutions[i+1].y
-        break -- eww, might rewrite
-      elseif resolutions[i].current == true and i == #resolutions then
-        resolutions[i].current = false
-        resolutions[1].current = true
-        love.graphics.setMode(resolutions[1].x, resolutions[1].y, false, true, 0)
-        max_width = resolutions[1].x
-        max_height = resolutions[1].y
-        break
-      end
-    end
-    --love.graphics.translate( 200, 200 )
+    --
   elseif key == 'f' then
     love.graphics.toggleFullscreen( )
   elseif key == 'm' then
@@ -323,38 +316,4 @@ end
 
 function love.quit()
   print("quit()")
-end
-
---
------ OTHER FUNCS -----
---
-
--- checks to see if the mosue is clicked or hovered inside a rectangle
-function mouse_inside(checking, x_mouse, y_mouse, x_pos, y_pos, width, height)
-  local valid_x = false
-  local valid_y = false
-
-  if x_mouse >= x_pos and x_mouse < x_pos + width then
-    valid_x = true
-  end
-  if y_mouse >= y_pos and y_mouse < y_pos + height then
-    valid_y = true
-  end
-  
-  if checking == "x_only" then
-    return valid_x
-  elseif checking == "y_only" then
-    return valid_y
-  elseif checking == "both" then
-    if valid_x == true and valid_y == true then
-      return true
-    else
-      return false
-    end
-  end
-end
-
--- string, y position
-function print_centered(s, y)
-  love.graphics.printf(s, 0, y, max_width, 'center')
 end

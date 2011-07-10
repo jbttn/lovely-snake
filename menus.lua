@@ -11,7 +11,9 @@ function click_event(item)
 
   -- Options Menu
   if item == "Difficulty" then
-    game_state = "difficulty_menu" --not yet implemented
+    game_state = "difficulty_menu"
+  elseif item == "Resolutions" then
+    game_state = "resolutions_menu"
   elseif item == "Back" then
     game_state = "main_menu"
   end
@@ -20,6 +22,16 @@ function click_event(item)
   for key, value in ipairs(ui.difficulty_menu) do
     if item == value.label then
       current_difficulty = value.option
+      update_options_file()
+    end
+  end
+
+  -- Resolutions Menu
+  for key, value in ipairs(ui.resolutions_menu) do
+    if item == value.label then
+      love.graphics.setMode(value.width, value.height, false, true, 0)
+      max_width = value.width
+      max_height = value.height
       update_options_file()
     end
   end
