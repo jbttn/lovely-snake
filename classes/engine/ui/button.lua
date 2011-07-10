@@ -42,6 +42,18 @@ function Button:hovered(mouse_x, mouse_y)
   end
 end
 
+function Button:selected()
+  -- Highlight selected options
+  if game_state == "difficulty_menu" then
+    for key, value in next, ui.difficulty_menu, nil do
+      if current_difficulty == value.option then
+        return value
+      end
+    end
+  end
+
+end
+
 function Button:clicked(func)
   print("clicked ", self.label)
   click_event(self.label)
@@ -57,9 +69,13 @@ function Button:update(mouse_x, mouse_y)
 end
 
 function Button:draw(mouse_x, mouse_y)
+  local selected = self:selected() or {} -- to highlight the selected menu options
+
   if self:hovered(mouse_x, mouse_y) then
     love.graphics.setColor(colors.red)
-    --hovering_over = self.label -- temp solution...
+  end
+  if selected.label == self.label then
+    love.graphics.setColor(colors.red)
   end
   love.graphics.setFont(medium_font)
   love.graphics.print(self.label, self.position.x, self.position.y)

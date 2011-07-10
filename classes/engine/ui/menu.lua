@@ -11,11 +11,12 @@ function Menu:initialize(b)
   for key, value in ipairs(b) do
     if type(value) == "string" then
       table.insert(self.buttons, Button:new(true, value))
+    elseif type(value) == "table" then
+      table.insert(self.buttons, Button:new(true, value.label))
     end
   end
 
   for key, value in ipairs(self.buttons) do
-    --value.position.y = self:get_loc(self.button_loc, key)
     value:set_position({y = self:get_loc(key)})
   end
 end
