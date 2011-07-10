@@ -4,6 +4,8 @@
 
 love.filesystem.load("lib/middleclass.lua")()
 
+love.filesystem.load("classes/engine/ui/menu.lua")()
+love.filesystem.load("classes/engine/ui/button.lua")()
 love.filesystem.load("classes/engine/actor.lua")()
 love.filesystem.load("classes/engine/level.lua")()
 love.filesystem.load("classes/engine/camera.lua")()
@@ -84,7 +86,7 @@ function love.load()
         very_hard = {str="V.Hard", x_pos=max_width * 0.65, y_pos=max_height * 0.35}
       },
       "Difficulty",
-      function () display_horizontal_buttons() end, -- function to print difficulty buttons
+      function() display_horizontal_buttons() end, -- function to print difficulty buttons
       "Back"
     }
   }
@@ -117,10 +119,18 @@ function love.load()
   camera = Camera:new()
   snake = Snake:new()
   food = Food:new()
+  main_menu = Menu:new(ui.main_menu)
+  options_menu = Menu:new(ui.options_menu)
+  game_over_menu = Menu:new(ui.game_over_menu)
+  bttn = Button:new(true, "WTF")
 end
 
-function love.update(dt)  
+function love.update(dt)
+  local mouse_x = love.mouse.getX()
+  local mouse_y = love.mouse.getY()
+
   if game_state == "main_menu" then
+    main_menu:update(mouse_x, mouse_y)
     return
   elseif game_state == "options_menu" then
     return
@@ -156,10 +166,6 @@ function love.update(dt)
 end
 
 function love.draw()
-  --x = os.clock()
-  level:draw_level() -- slowing down framerate
-  --print(string.format("elapsed time: %.10f\n", os.clock() - x))
-  
   love.graphics.setColor({30, 40, 80, 255})
   love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 20)
   love.graphics.print("HIGH SCORE: " .. high_score, 10, 50)
@@ -171,19 +177,23 @@ function love.draw()
   local mouse_y = love.mouse.getY()
   
   if game_state == "main_menu" then
-    draw_main_menu(mouse_x, mouse_y)
+    main_menu:draw(mouse_x, mouse_y)
+    --draw_main_menu(mouse_x, mouse_y)
     
   elseif game_state == "options_menu" then
-    draw_options_menu(mouse_x, mouse_y)
+    options_menu:draw(mouse_x, mouse_y)
+    --draw_options_menu(mouse_x, mouse_y)
     
   elseif game_state == "paused" then
     love.graphics.setColor(colors.white)
     love.graphics.printf("PAUSED", 0, max_height / 2, max_width, 'center')
     
   elseif game_state == "game_over" then
-    draw_game_over_menu(mouse_x, mouse_y)
+    game_over_menu:draw(mouse_x, mouse_y)
+    --draw_game_over_menu(mouse_x, mouse_y)
     
   elseif game_state == "running" then
+    level:draw_level()
     --[[ -- drawing in level for now
     -- Draw the snake food
     if next(snake_food) ~= nil then
@@ -215,6 +225,8 @@ function love.mousereleased(x, y, button) -- needs updated to work with menus, t
   if button == 'l' then
     
     if game_state == "main_menu" then
+      main_menu:clicked(x, y)
+      --[[
       if hovering_over == "New Game" then
         print("clicked new game")
         game_state = "running"
@@ -231,7 +243,10 @@ function love.mousereleased(x, y, button) -- needs updated to work with menus, t
         print("clicked quit")
         love.event.push('q')
       end
-    elseif game_state == "game_over" then  
+      ]]
+    elseif game_state == "game_over" then
+      game_over_menu:clicked(x, y)
+      --[[
       if hovering_over == "Try Again" then
         print("clicked Try Again")
         game_state = "running"
@@ -241,7 +256,10 @@ function love.mousereleased(x, y, button) -- needs updated to work with menus, t
         print("clicked main menu")
         game_state = "main_menu"
       end
+      ]]
     elseif game_state == "options_menu" then
+      options_menu:clicked(x, y)
+      --[[
       for key, value in next, ui.options_menu.difficulty_buttons, nil do
         if key ~= "width" and key ~= "height" then
           --print(key, value)
@@ -259,6 +277,7 @@ function love.mousereleased(x, y, button) -- needs updated to work with menus, t
         print("clicked back")
         game_state = "main_menu"
       end
+      ]]
     end
     
   end
@@ -343,6 +362,9 @@ function love.keypressed(key, unicode)
   elseif key == 'd' then
     --act = Actor:new("testing")
     --act:foobar()
+  elseif key == 'p' then
+    bttn:set_position({x = 100, y = 100})
+    bttn:set_label("Hello World!")
   end
 end
 
