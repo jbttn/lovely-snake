@@ -239,7 +239,13 @@ end
 
 -- function to get what symbol is located on the world at position x,y
 function Level:get_from_world_coords(x_pos, y_pos)
-  return self.level_table[x_pos][y_pos]
+  local level_size = self:get_level_size()
+
+  if((x_pos <= level_size.width / block_size and x_pos >= 1) and (y_pos <= level_size.height / block_size and y_pos >= 1)) then
+    return self.level_table[x_pos][y_pos]
+  else
+    return nil
+  end
 end
 
 function Level:is_scrolling(direction)

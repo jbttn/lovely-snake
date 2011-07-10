@@ -92,6 +92,15 @@ function Snake:check_collision(pos)
       end
     end
   end
+
+  -- Check collision with level
+  local snake_pos = level:get_coords("world", self.body["head"]["x"], self.body["head"]["y"])
+  snake_pos.x = snake_pos.x + 1 -- my coordinate system starts with 0... tables are 1 indexed.
+  snake_pos.y = snake_pos.y + 1
+  local symbol = level:get_from_world_coords(snake_pos.x, snake_pos.y)
+  if symbol == "*" then
+    return self:kill()
+  end
   
   -- Check collision with food
   --local temp = level:get_coords("world", self.body["head"]["x"], self.body["head"]["y"]) -- if snake in middle with screen scroll snake loc doesnt change...but then we need world locs? NEED TO CHECK IF TEMP IS NIL!!!!!!

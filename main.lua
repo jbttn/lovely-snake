@@ -67,6 +67,8 @@ function love.load()
       title = "Resolutions",
       {label = "800 x 600", width = 800, height = 600},
       {label = "1024 x 768", width = 1024, height = 768},
+      {label = "1120 x 800", width = 1120, height = 800},
+      {label = "1280 x 1024", width = 1280, height = 1024},
       {label = "1920 x 1080", width = 1920, height = 1080},
       "Back"
     },

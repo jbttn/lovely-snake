@@ -36,8 +36,8 @@ local tile_string = [[
 
 local quad_data = { 
   { '#',  0,  0 }, -- grass
-  { ' ',  32,  0 },-- trees
-  { '*',  0,  32 },-- rocks
+  { '*',  32,  0 },-- trees
+  { ' ',  0,  32 },-- rocks
   { 'f',  32,  32 },-- flowers
 }
 
